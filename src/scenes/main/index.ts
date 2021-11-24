@@ -43,7 +43,7 @@ export class MainScene extends Scene {
   create(): void {
     this.initMap();
     this.agv = new Agv(this, 32, 32 * 14);
-    this.initAgents(3, 1000000);
+    this.initAgents(3, 10000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
   }
@@ -93,7 +93,7 @@ export class MainScene extends Scene {
   private updateAgents(num: number): void {
     if (this.agents.length != 0) {
       for (let i = 0; i < this.agents.length; i++) {
-        this.agents[i].destroy();
+        this.agents[i].terminate();
       }
     }
     let randoms = [];
@@ -110,6 +110,13 @@ export class MainScene extends Scene {
         this.groundPos,
         i
       );
+      // let agent = new Agent(
+      //   this,
+      //   this.groundPos[5],
+      //   this.groundPos[103],
+      //   this.groundPos,
+      //   i
+      // );
       agent.setPushable(false);
       this.physics.add.collider(this.agv, agent, () => {});
       this.agents.push(agent);

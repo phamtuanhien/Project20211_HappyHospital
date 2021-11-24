@@ -1,27 +1,12 @@
-let cols = 52;
-let rows = 28;
-let grid = new Array(cols);
-
-let openSet = [];
-let closeSet = [];
-let start;
-let end;
-
-function removeFromArray(arr, elt) {
-    for( let i = arr.length-1; i>=0;i--) {
-        if(arr[i] ==elt) {
-            arr.splice(i,1)
-        }
-    }
-}
-
+import { Position } from "../classes/position";
 class Spot {
   public i: number;
   public j: number;
   public f: number;
   public g: number;
   public h: number;
-  public neighbors = [];
+  public neighbors: Spot[] = [];
+  public previous?: Spot;
   constructor(i: number, j: number) {
     this.i = i;
     this.j = j;
@@ -30,66 +15,132 @@ class Spot {
     this.h = 0;
   }
 
-  this.addNeighbors = function(grid) {
-      // add neighbors
+  public addNeighbors(ableSpot: Spot[]): void {
+    for (let k = 0; k < ableSpot.length; k++) {
+      if (this.i + 1 == ableSpot[k].i && this.j == ableSpot[k].j) {
+        this.neighbors.push(ableSpot[k]);
+      } else if (this.i == ableSpot[k].i && this.j + 1 == ableSpot[k].j) {
+        this.neighbors.push(ableSpot[k]);
+      } else if (this.i - 1 == ableSpot[k].i && this.j == ableSpot[k].j) {
+        this.neighbors.push(ableSpot[k]);
+      } else if (this.i == ableSpot[k].i && this.j - 1 == ableSpot[k].j) {
+        this.neighbors.push(ableSpot[k]);
+      }
+    }
+  }
+
+  public equal(spot: Spot): boolean {
+    if (this.i === spot.i && this.j === spot.j) return true;
+    return false;
   }
 }
 
-function setup() {
-  for (let i = 0; i < cols; i++) {
-    grid[i] = new Array(rows);
-  }
-  for (let i = 0; i < cols; i++) {
-    for (let j = 0; j < rows; j++) {
-      grid[i][j] = new Spot(i, j);
+export class Astar {
+  public width: number;
+  public height: number;
+  public start: Spot;
+  public end: Spot;
+  public ableSpot: Spot[];
+  public grid: Spot[][];
+  public path: Spot[] = [];
+
+  constructor(
+    width: number,
+    height: number,
+    startPos: Position,
+    endPos: Position,
+    ablePos: Position[]
+  ) {
+    this.width = width;
+    this.height = height;
+    this.start = new Spot(startPos.x, startPos.y);
+    this.end = new Spot(endPos.x, endPos.y);
+
+    this.grid = new Array(width);
+    for (let i = 0; i < width; i++) {
+      this.grid[i] = [];
+      for (let j = 0; j < height; j++) {
+        this.grid[i][j] = new Spot(i, j);
+      }
+    }
+
+    this.ableSpot = [];
+    for (let i = 0; i < ablePos.length; i++) {
+      this.ableSpot.push(this.grid[ablePos[i].x][ablePos[i].y]);
+    }
+
+    for (let i = 0; i < width; i++) {
+      for (let j = 0; j < height; j++) {
+        this.grid[i][j].addNeighbors(this.ableSpot);
+      }
     }
   }
 
-  start = grid[0][0];
-  end = grid[cols - 1][rows - 1];
-  openSet.push(start);
+  private heuristic(spot1: Spot, spot2: Spot): number {
+    return Math.abs(spot1.i - spot2.i) + Math.abs(spot1.j - spot2.j);
+  }
 
-  while(openSet.length > 0) {
+  private isInclude(spot: Spot, spots: Spot[]): boolean {
+    for (let i = 0; i < spots.length; i++) {
+      if (spot.i === spots[i].i && spot.j === spots[i].j) return true;
+    }
+    return false;
+  }
+
+  public cal(): Position[] | undefined {
+    let openSet: Spot[] = [];
+    let closeSet: Spot[] = [];
+    openSet.push(this.grid[this.start.i][this.start.j]);
+    while (openSet.length > 0) {
       let winner = 0;
-      for( let i = 0; i < openSet.length; i++) {
-          if (openSet[i].f < openSet[winner].f) {
-              winner = i;
-          }
+      for (let i = 0; i < openSet.length; i++) {
+        if (openSet[i].f < openSet[winner].f) {
+          winner = i;
+        }
       }
 
-      var current = openSet[winner];
+      let current = openSet[winner];
 
-      if (openSet[winner] == end) {
-        console.log("DONE!")
+      if (openSet[winner].equal(this.end)) {
+        let cur: Spot = this.grid[this.end.i][this.end.j];
+        this.path.push(cur);
+        while (cur.previous != undefined) {
+          this.path.push(cur.previous);
+          cur = cur.previous;
+        }
+        this.path.reverse();
+        let result: Position[] = [];
+        for (let k = 0; k < this.path.length; k++) {
+          result.push(new Position(this.path[k].i, this.path[k].j));
+        }
+        return result;
       }
 
-      removeFromArray(openSet, current);
+      openSet.splice(winner, 1);
       closeSet.push(current);
 
-      const neighbors = current.neighbors;
+      const neighbors: Spot[] = current.neighbors;
+
       for (let i = 0; i < neighbors.length; i++) {
-          var neighbor = neighbors[i];
-
-          if (!closeSet.includes(neighbor)){
-              var tempG = current.g + 1;
-
-              if (openSet.includes(neighbor)) {
-                  if (tempG <neighbor.g) {
-                      neighbor.g = tempG;
-                  }
-              } else {
-                  neighbor.g = tempG;
-                  openSet.push(neighbor);
-              }
-
-              neighbor.h = heuristic(neighbor, end);
-              neighbor.f = neighbor.g + neighbor.h;
+        const neighbor = neighbors[i];
+        if (!this.isInclude(neighbor, closeSet)) {
+          let tempG = current.g + 1;
+          if (this.isInclude(neighbor, openSet)) {
+            if (tempG < neighbor.g) {
+              neighbor.g = tempG;
+            }
+          } else {
+            neighbor.g = tempG;
+            openSet.push(neighbor);
           }
 
-
+          neighbor.h = this.heuristic(neighbor, this.end);
+          neighbor.f = neighbor.h + neighbor.g;
+          neighbor.previous = current;
+        }
       }
-
-    } else {
-        console.log("no solution")
     }
+    console.log("path not found!");
+    return undefined;
+  }
 }
