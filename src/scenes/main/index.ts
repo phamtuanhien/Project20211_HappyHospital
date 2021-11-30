@@ -43,7 +43,8 @@ export class MainScene extends Scene {
   create(): void {
     this.initMap();
     this.agv = new Agv(this, 32, 32 * 14);
-    this.initAgents(3, 10000);
+    this.agv.setPushable(false);
+    this.initAgents(10, 1000000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
   }
@@ -63,6 +64,7 @@ export class MainScene extends Scene {
     this.noPathLayer.setCollisionByProperty({ collides: true });
     this.groundLayer = this.map.createLayer("ground", this.tileset, 0, 0);
     this.roomLayer = this.map.createLayer("room", this.tileset, 0, 0);
+    this.roomLayer.setCollisionByProperty({ collides: true });
     this.wallLayer = this.map.createLayer("wall", this.tileset, 0, 0);
     this.pathLayer = this.map.createLayer("path", this.tileset, 0, 0);
     this.doorLayer = this.map.createLayer("door", this.tileset, 0, 0);
@@ -82,6 +84,10 @@ export class MainScene extends Scene {
         const pos: Position = new Position(v.x, v.y);
         this.groundPos.push(pos);
       });
+    console.log(
+      "number of gate: ",
+      this.gateLayer.getTilesWithin().filter((v) => v.index != -1).length
+    );
   }
 
   private initAgents(num: number, time: number): void {
@@ -118,6 +124,7 @@ export class MainScene extends Scene {
       //   i
       // );
       agent.setPushable(false);
+      this.physics.add.collider(agent, this.roomLayer);
       this.physics.add.collider(this.agv, agent, () => {});
       this.agents.push(agent);
     }
