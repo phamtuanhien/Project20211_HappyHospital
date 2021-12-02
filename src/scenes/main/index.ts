@@ -6,10 +6,8 @@ import { Position } from "../../classes/position";
 export class MainScene extends Scene {
   private agv!: Agv;
   private agents!: Agent[];
-
   private map!: Tilemaps.Tilemap;
   private tileset!: Tilemaps.Tileset;
-
   private groundLayer!: Tilemaps.TilemapLayer;
   private elevatorLayer!: Tilemaps.TilemapLayer;
   private roomLayer!: Tilemaps.TilemapLayer;
@@ -20,6 +18,7 @@ export class MainScene extends Scene {
   private noPathLayer!: Tilemaps.TilemapLayer;
   private bedLayer!: Tilemaps.TilemapLayer;
   private groundPos!: Position[];
+
   constructor() {
     super("main-scene");
     this.agents = new Array();
@@ -42,9 +41,9 @@ export class MainScene extends Scene {
 
   create(): void {
     this.initMap();
-    this.agv = new Agv(this, 32, 32 * 14);
+    this.agv = new Agv(this, 32, 32 * 14, this.pathLayer);
     this.agv.setPushable(false);
-    this.initAgents(10, 1000000);
+    this.initAgents(1, 1000000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
   }
@@ -61,22 +60,25 @@ export class MainScene extends Scene {
     });
     this.tileset = this.map.addTilesetImage("hospital", "tiles");
     this.noPathLayer = this.map.createLayer("nopath", this.tileset, 0, 0);
-    this.noPathLayer.setCollisionByProperty({ collides: true });
     this.groundLayer = this.map.createLayer("ground", this.tileset, 0, 0);
     this.roomLayer = this.map.createLayer("room", this.tileset, 0, 0);
-    this.roomLayer.setCollisionByProperty({ collides: true });
     this.wallLayer = this.map.createLayer("wall", this.tileset, 0, 0);
     this.pathLayer = this.map.createLayer("path", this.tileset, 0, 0);
     this.doorLayer = this.map.createLayer("door", this.tileset, 0, 0);
     this.elevatorLayer = this.map.createLayer("elevator", this.tileset, 0, 0);
     this.gateLayer = this.map.createLayer("gate", this.tileset, 0, 0);
     this.bedLayer = this.map.createLayer("bed", this.tileset, 0, 0);
+
+    this.noPathLayer.setCollisionByProperty({ collides: true });
+    this.roomLayer.setCollisionByProperty({ collides: true });
+
     this.physics.world.setBounds(
       0,
       0,
       this.groundLayer.width,
       this.groundLayer.height
     );
+
     this.groundLayer
       .getTilesWithin()
       .filter((v) => v.index != -1)
@@ -84,10 +86,6 @@ export class MainScene extends Scene {
         const pos: Position = new Position(v.x, v.y);
         this.groundPos.push(pos);
       });
-    console.log(
-      "number of gate: ",
-      this.gateLayer.getTilesWithin().filter((v) => v.index != -1).length
-    );
   }
 
   private initAgents(num: number, time: number): void {

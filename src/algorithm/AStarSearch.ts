@@ -80,6 +80,10 @@ export class Astar {
     return Math.abs(spot1.i - spot2.i) + Math.abs(spot1.j - spot2.j);
   }
 
+  private heuristic2(spot1: Spot, spot2: Spot): number {
+    return Math.sqrt((spot1.i - spot2.i) ** 2 + (spot1.j - spot2.j) ** 2);
+  }
+
   private isInclude(spot: Spot, spots: Spot[]): boolean {
     for (let i = 0; i < spots.length; i++) {
       if (spot.i === spots[i].i && spot.j === spots[i].j) return true;
@@ -134,7 +138,7 @@ export class Astar {
             openSet.push(neighbor);
           }
 
-          neighbor.h = this.heuristic(neighbor, this.end);
+          neighbor.h = this.heuristic2(neighbor, this.end);
           neighbor.f = neighbor.h + neighbor.g;
           neighbor.previous = current;
         }
