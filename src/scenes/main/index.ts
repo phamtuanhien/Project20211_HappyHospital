@@ -18,11 +18,19 @@ export class MainScene extends Scene {
   private noPathLayer!: Tilemaps.TilemapLayer;
   private bedLayer!: Tilemaps.TilemapLayer;
   private groundPos!: Position[];
+  private danhsachke: Position[][][];
 
   constructor() {
     super("main-scene");
     this.agents = new Array();
     this.groundPos = new Array();
+    this.danhsachke = new Array(52);
+    for (let i = 0; i < this.danhsachke.length; i++) {
+      this.danhsachke[i] = new Array(28);
+      for (let j = 0; j < this.danhsachke[i].length; j++) {
+        this.danhsachke[i][j] = [];
+      }
+    }
   }
 
   preload(): void {
@@ -39,8 +47,116 @@ export class MainScene extends Scene {
     });
   }
 
+  private taodanhsachke() {
+    let tiles: Tilemaps.Tile[] = [];
+    this.pathLayer
+      .getTilesWithin()
+      .filter((v) => v.index != -1)
+      .forEach((v) => {
+        tiles.push(v);
+      });
+    for (let i = 0; i < tiles.length; i++) {
+      for (let j = 0; j < tiles.length; j++) {
+        if (i != j) {
+          // neu o dang xet khong co huong
+          if (!tiles[i].properties.direction) {
+            if (tiles[i].x == tiles[j].x && tiles[i].y == tiles[j].y + 1) {
+              if (
+                tiles[j].properties.direction == "top" ||
+                !tiles[j].properties.direction
+              ) {
+                this.danhsachke[tiles[i].x][tiles[i].y].push(
+                  new Position(tiles[j].x, tiles[j].y)
+                );
+              }
+            }
+            if (tiles[i].x + 1 == tiles[j].x && tiles[i].y == tiles[j].y) {
+              if (
+                tiles[j].properties.direction == "right" ||
+                !tiles[j].properties.direction
+              ) {
+                this.danhsachke[tiles[i].x][tiles[i].y].push(
+                  new Position(tiles[j].x, tiles[j].y)
+                );
+              }
+            }
+            if (tiles[i].x == tiles[j].x && tiles[i].y + 1 == tiles[j].y) {
+              if (
+                tiles[j].properties.direction == "bottom" ||
+                !tiles[j].properties.direction
+              ) {
+                this.danhsachke[tiles[i].x][tiles[i].y].push(
+                  new Position(tiles[j].x, tiles[j].y)
+                );
+              }
+            }
+            if (tiles[i].x == tiles[j].x + 1 && tiles[i].y == tiles[j].y) {
+              if (
+                tiles[j].properties.direction == "left" ||
+                !tiles[j].properties.direction
+              ) {
+                this.danhsachke[tiles[i].x][tiles[i].y].push(
+                  new Position(tiles[j].x, tiles[j].y)
+                );
+              }
+            }
+          }
+          // neu o dang xet co huong
+          else {
+            if (tiles[i].properties.direction == "top") {
+              if (
+                tiles[i].x == tiles[j].x &&
+                tiles[i].y == tiles[j].y + 1 &&
+                tiles[i].properties.direction != "bottom"
+              ) {
+                this.danhsachke[tiles[i].x][tiles[i].y].push(
+                  new Position(tiles[j].x, tiles[j].y)
+                );
+              }
+            }
+            if (tiles[i].properties.direction == "right") {
+              if (
+                tiles[i].x + 1 == tiles[j].x &&
+                tiles[i].y == tiles[j].y &&
+                tiles[i].properties.direction != "left"
+              ) {
+                this.danhsachke[tiles[i].x][tiles[i].y].push(
+                  new Position(tiles[j].x, tiles[j].y)
+                );
+              }
+            }
+            if (tiles[i].properties.direction == "bottom") {
+              if (
+                tiles[i].x == tiles[j].x &&
+                tiles[i].y + 1 == tiles[j].y &&
+                tiles[i].properties.direction != "top"
+              ) {
+                this.danhsachke[tiles[i].x][tiles[i].y].push(
+                  new Position(tiles[j].x, tiles[j].y)
+                );
+              }
+            }
+            if (tiles[i].properties.direction == "left") {
+              if (
+                tiles[i].x == tiles[j].x + 1 &&
+                tiles[i].y == tiles[j].y &&
+                tiles[i].properties.direction != "right"
+              ) {
+                this.danhsachke[tiles[i].x][tiles[i].y].push(
+                  new Position(tiles[j].x, tiles[j].y)
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+    console.log(this.danhsachke);
+  }
+
   create(): void {
     this.initMap();
+    this.taodanhsachke();
     this.agv = new Agv(this, 32, 32 * 14, this.pathLayer);
     this.agv.setPushable(false);
     this.initAgents(1, 1000000);
@@ -114,18 +230,10 @@ export class MainScene extends Scene {
         this.groundPos,
         i
       );
-      // let agent = new Agent(
-      //   this,
-      //   this.groundPos[5],
-      //   this.groundPos[103],
-      //   this.groundPos,
-      //   i
-      // );
       agent.setPushable(false);
       this.physics.add.collider(agent, this.roomLayer);
       this.physics.add.collider(this.agv, agent, () => {});
       this.agents.push(agent);
     }
-    // console.log(this.agents);
   }
 }

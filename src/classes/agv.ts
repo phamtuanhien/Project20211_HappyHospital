@@ -60,7 +60,7 @@ export class Agv extends Actor {
       }
     }
 
-    console.log("t: ", t, " ", "r: ", r, " ", "b: ", b, " ", "l: ", l);
+    // console.log("t: ", t, " ", "r: ", r, " ", "b: ", b, " ", "l: ", l);
 
     if (this.keyW?.isDown) {
       // console.log("x: ", this.x);
