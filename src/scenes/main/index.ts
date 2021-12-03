@@ -19,6 +19,9 @@ export class MainScene extends Scene {
   private bedLayer!: Tilemaps.TilemapLayer;
   private groundPos!: Position[];
   private danhsachke: Position[][][];
+  private saveButton?: Phaser.GameObjects.Text;
+  private loadButton?: Phaser.GameObjects.Text;
+  private mapData: any = {};
 
   constructor() {
     super("main-scene");
@@ -45,6 +48,155 @@ export class MainScene extends Scene {
       frameWidth: 32,
       frameHeight: 32,
     });
+  }
+
+  create(): void {
+    this.initMap();
+    this.taodanhsachke();
+    this.agv = new Agv(this, 32, 32 * 14, this.pathLayer);
+    this.agv.setPushable(false);
+
+    this.saveButton = this.add.text(window.innerWidth - 200, 50, "Save data", {
+      backgroundColor: "#eee",
+      padding: { bottom: 5, top: 5, left: 10, right: 10 },
+      color: "#000",
+      fontSize: "24px",
+      fontStyle: "bold",
+    });
+    this.loadButton = this.add.text(window.innerWidth - 200, 110, "Load data", {
+      backgroundColor: "#eee",
+      padding: { bottom: 5, top: 5, left: 10, right: 10 },
+      color: "#000",
+      fontSize: "24px",
+      fontStyle: "bold",
+    });
+    this.saveButton
+      .setInteractive()
+      .on("pointerdown", () => this.handleClickSaveButton());
+    this.loadButton
+      .setInteractive()
+      .on("pointerdown", () => this.handleClickLoadButton());
+
+    this.initAgents(1, 1000000);
+
+    this.physics.add.collider(this.agv, this.noPathLayer);
+  }
+
+  update(): void {
+    this.agv.update();
+  }
+
+  private handleClickSaveButton() {
+    this.mapData = {};
+    this.mapData.agv = this.agv;
+    this.mapData.agents = this.agents;
+
+    const objJSON = JSON.stringify(this.mapData);
+    const text = encodeURIComponent(objJSON);
+    const e = document.createElement("a");
+    e.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+    );
+    e.setAttribute("download", "save.json");
+    e.style.display = "none";
+    document.body.appendChild(e);
+    e.click();
+    document.body.removeChild(e);
+  }
+
+  private handleClickLoadButton() {
+    console.log("hehe");
+    const e = document.createElement("input");
+    const reader = new FileReader();
+    const openFile = (event: any) => {
+      var input = event.target;
+      reader.onload = () => {
+        if (typeof reader?.result == "string") {
+          this.mapData = JSON.parse(decodeURIComponent(reader?.result));
+          this.agv.setX(this.mapData.agv.x);
+          this.agv.setY(this.mapData.agv.y);
+          console.log(this.mapData);
+        }
+      };
+      reader.readAsText(input.files[0]);
+    };
+    e.type = "file";
+    e.style.display = "none";
+    e.addEventListener("change", openFile, false);
+    document.body.appendChild(e);
+    e.click();
+    document.body.removeChild(e);
+  }
+
+  private initMap(): void {
+    this.map = this.make.tilemap({
+      key: "hospital",
+      tileHeight: 32,
+      tileWidth: 32,
+    });
+    this.tileset = this.map.addTilesetImage("hospital", "tiles");
+    this.noPathLayer = this.map.createLayer("nopath", this.tileset, 0, 0);
+    this.groundLayer = this.map.createLayer("ground", this.tileset, 0, 0);
+    this.roomLayer = this.map.createLayer("room", this.tileset, 0, 0);
+    this.wallLayer = this.map.createLayer("wall", this.tileset, 0, 0);
+    this.pathLayer = this.map.createLayer("path", this.tileset, 0, 0);
+    this.doorLayer = this.map.createLayer("door", this.tileset, 0, 0);
+    this.elevatorLayer = this.map.createLayer("elevator", this.tileset, 0, 0);
+    this.gateLayer = this.map.createLayer("gate", this.tileset, 0, 0);
+    this.bedLayer = this.map.createLayer("bed", this.tileset, 0, 0);
+
+    this.noPathLayer.setCollisionByProperty({ collides: true });
+    this.roomLayer.setCollisionByProperty({ collides: true });
+
+    this.physics.world.setBounds(
+      0,
+      0,
+      this.groundLayer.width,
+      this.groundLayer.height
+    );
+
+    this.groundLayer
+      .getTilesWithin()
+      .filter((v) => v.index != -1)
+      .forEach((v) => {
+        const pos: Position = new Position(v.x, v.y);
+        this.groundPos.push(pos);
+      });
+  }
+
+  private initAgents(num: number, time: number): void {
+    this.updateAgents(num);
+    setInterval(() => {
+      this.updateAgents(num);
+    }, time);
+  }
+
+  private updateAgents(num: number): void {
+    if (this.agents.length != 0) {
+      for (let i = 0; i < this.agents.length; i++) {
+        this.agents[i].terminate();
+      }
+    }
+    let randoms = [];
+    while (randoms.length < num * 2) {
+      var r = Math.floor(Math.random() * this.groundPos.length);
+      if (randoms.indexOf(r) === -1) randoms.push(r);
+    }
+    this.agents = [];
+    for (let i = 0; i < num; i++) {
+      let agent = new Agent(
+        this,
+        this.groundPos[randoms[i]],
+        this.groundPos[randoms[i + num]],
+        this.groundPos,
+        i
+      );
+      agent.setPushable(false);
+      this.physics.add.collider(agent, this.roomLayer);
+      this.physics.add.collider(this.agv, agent, () => {});
+      this.agents.push(agent);
+    }
   }
 
   private taodanhsachke() {
@@ -152,88 +304,5 @@ export class MainScene extends Scene {
       }
     }
     console.log(this.danhsachke);
-  }
-
-  create(): void {
-    this.initMap();
-    this.taodanhsachke();
-    this.agv = new Agv(this, 32, 32 * 14, this.pathLayer);
-    this.agv.setPushable(false);
-    this.initAgents(1, 1000000);
-
-    this.physics.add.collider(this.agv, this.noPathLayer);
-  }
-
-  update(): void {
-    this.agv.update();
-  }
-
-  private initMap(): void {
-    this.map = this.make.tilemap({
-      key: "hospital",
-      tileHeight: 32,
-      tileWidth: 32,
-    });
-    this.tileset = this.map.addTilesetImage("hospital", "tiles");
-    this.noPathLayer = this.map.createLayer("nopath", this.tileset, 0, 0);
-    this.groundLayer = this.map.createLayer("ground", this.tileset, 0, 0);
-    this.roomLayer = this.map.createLayer("room", this.tileset, 0, 0);
-    this.wallLayer = this.map.createLayer("wall", this.tileset, 0, 0);
-    this.pathLayer = this.map.createLayer("path", this.tileset, 0, 0);
-    this.doorLayer = this.map.createLayer("door", this.tileset, 0, 0);
-    this.elevatorLayer = this.map.createLayer("elevator", this.tileset, 0, 0);
-    this.gateLayer = this.map.createLayer("gate", this.tileset, 0, 0);
-    this.bedLayer = this.map.createLayer("bed", this.tileset, 0, 0);
-
-    this.noPathLayer.setCollisionByProperty({ collides: true });
-    this.roomLayer.setCollisionByProperty({ collides: true });
-
-    this.physics.world.setBounds(
-      0,
-      0,
-      this.groundLayer.width,
-      this.groundLayer.height
-    );
-
-    this.groundLayer
-      .getTilesWithin()
-      .filter((v) => v.index != -1)
-      .forEach((v) => {
-        const pos: Position = new Position(v.x, v.y);
-        this.groundPos.push(pos);
-      });
-  }
-
-  private initAgents(num: number, time: number): void {
-    this.updateAgents(num);
-    setInterval(() => {
-      this.updateAgents(num);
-    }, time);
-  }
-  private updateAgents(num: number): void {
-    if (this.agents.length != 0) {
-      for (let i = 0; i < this.agents.length; i++) {
-        this.agents[i].terminate();
-      }
-    }
-    let randoms = [];
-    while (randoms.length < num * 2) {
-      var r = Math.floor(Math.random() * this.groundPos.length);
-      if (randoms.indexOf(r) === -1) randoms.push(r);
-    }
-    this.agents = [];
-    for (let i = 0; i < num; i++) {
-      let agent = new Agent(
-        this,
-        this.groundPos[randoms[i]],
-        this.groundPos[randoms[i + num]],
-        this.groundPos,
-        i
-      );
-      agent.setPushable(false);
-      this.physics.add.collider(agent, this.roomLayer);
-      this.physics.add.collider(this.agv, agent, () => {});
-      this.agents.push(agent);
-    }
   }
 }

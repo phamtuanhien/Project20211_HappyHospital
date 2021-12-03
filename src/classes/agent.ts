@@ -13,6 +13,7 @@ export class Agent extends Actor {
   private agentText: Text;
   private astar: Astar;
   private next: number = 1;
+
   constructor(
     scene: Phaser.Scene,
     startPos: Position,
