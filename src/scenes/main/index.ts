@@ -77,7 +77,7 @@ export class MainScene extends Scene {
       .setInteractive()
       .on("pointerdown", () => this.handleClickLoadButton());
 
-    this.initAgents(1, 1000000);
+    this.initAgents(6, 1000000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
   }
@@ -87,16 +87,18 @@ export class MainScene extends Scene {
   }
 
   private handleClickSaveButton() {
+    alert("Saved!");
     this.mapData = {};
     this.mapData.agv = this.agv;
     this.mapData.agents = this.agents;
 
     const objJSON = JSON.stringify(this.mapData);
-    const text = encodeURIComponent(objJSON);
+    const text = objJSON;
     const e = document.createElement("a");
     e.setAttribute(
       "href",
-      "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+      // "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+      "data:text/plain;charset=utf-8," + text
     );
     e.setAttribute("download", "save.json");
     e.style.display = "none";
@@ -106,17 +108,18 @@ export class MainScene extends Scene {
   }
 
   private handleClickLoadButton() {
-    console.log("hehe");
     const e = document.createElement("input");
     const reader = new FileReader();
     const openFile = (event: any) => {
       var input = event.target;
       reader.onload = () => {
         if (typeof reader?.result == "string") {
-          this.mapData = JSON.parse(decodeURIComponent(reader?.result));
+          // this.mapData = JSON.parse(decodeURIComponent(reader?.result));
+          this.mapData = JSON.parse(reader?.result);
           this.agv.setX(this.mapData.agv.x);
           this.agv.setY(this.mapData.agv.y);
-          console.log(this.mapData);
+          // console.log(this.mapData);
+          alert("Loaded!");
         }
       };
       reader.readAsText(input.files[0]);
@@ -163,6 +166,11 @@ export class MainScene extends Scene {
         const pos: Position = new Position(v.x, v.y);
         this.groundPos.push(pos);
       });
+    console.log(
+      "Number of gate: ",
+      this.gateLayer.getTilesWithin().filter((v) => v.index != -1).length
+    ); 
+    // console.log("-------------------------------------------------");
   }
 
   private initAgents(num: number, time: number): void {
@@ -303,6 +311,6 @@ export class MainScene extends Scene {
         }
       }
     }
-    console.log(this.danhsachke);
+    // console.log(this.danhsachke);
   }
 }

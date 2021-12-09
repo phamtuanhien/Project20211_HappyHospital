@@ -144,7 +144,7 @@ export class Astar {
         }
       }
     }
-    console.log("path not found!");
+    console.log("Path not found!");
     return undefined;
   }
 }

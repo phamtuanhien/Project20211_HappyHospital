@@ -47,7 +47,10 @@ export class Agent extends Actor {
 
     this.astar = new Astar(52, 28, startPos, endPos, groundPos);
     this.path = this.astar.cal();
-
+    console.log("-------------------------------------------------");
+    console.log("[Agent] Start: (%d, %d), End: (%d, %d)", startPos.x, startPos.y, endPos.x, endPos.y);
+    console.log(this.path);
+    
     this.initVertexs();
 
     // PHYSICS
