@@ -2,9 +2,13 @@ import { GameObjects, Scene, Tilemaps } from "phaser";
 import { Agv } from "../../classes/agv";
 import { Agent } from "../../classes/agent";
 import { Position } from "../../classes/position";
+import { AutoAgv } from "../../classes/AutoAgv";
+import { Nodee } from "../../classes/node";
+import { Graph } from "../../classes/graph";
 
 export class MainScene extends Scene {
   private agv!: Agv;
+  private autoAgv?: AutoAgv;
   private agents!: Agent[];
   private map!: Tilemaps.Tilemap;
   private tileset!: Tilemaps.Tileset;
@@ -18,15 +22,18 @@ export class MainScene extends Scene {
   private noPathLayer!: Tilemaps.TilemapLayer;
   private bedLayer!: Tilemaps.TilemapLayer;
   private groundPos!: Position[];
+  private pathPos!: Position[];
   private danhsachke: Position[][][];
   private saveButton?: Phaser.GameObjects.Text;
   private loadButton?: Phaser.GameObjects.Text;
   private mapData: any = {};
+  private graph?: Graph;
 
   constructor() {
     super("main-scene");
     this.agents = new Array();
     this.groundPos = new Array();
+    this.pathPos = new Array();
     this.danhsachke = new Array(52);
     for (let i = 0; i < this.danhsachke.length; i++) {
       this.danhsachke[i] = new Array(28);
@@ -53,7 +60,9 @@ export class MainScene extends Scene {
   create(): void {
     this.initMap();
     this.taodanhsachke();
+    this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
     this.agv = new Agv(this, 32, 32 * 14, this.pathLayer);
+    this.autoAgv = new AutoAgv(this, 32, 32 * 13, this.graph);
     this.agv.setPushable(false);
 
     this.saveButton = this.add.text(window.innerWidth - 200, 50, "Save data", {
@@ -77,7 +86,7 @@ export class MainScene extends Scene {
       .setInteractive()
       .on("pointerdown", () => this.handleClickLoadButton());
 
-    this.initAgents(1, 1000000);
+    // this.initAgents(10, 1000000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
   }
@@ -162,6 +171,13 @@ export class MainScene extends Scene {
       .forEach((v) => {
         const pos: Position = new Position(v.x, v.y);
         this.groundPos.push(pos);
+      });
+    this.pathLayer
+      .getTilesWithin()
+      .filter((v) => v.index != -1)
+      .forEach((v) => {
+        const pos: Position = new Position(v.x, v.y);
+        this.pathPos.push(pos);
       });
   }
 
@@ -303,6 +319,5 @@ export class MainScene extends Scene {
         }
       }
     }
-    console.log(this.danhsachke);
   }
 }
