@@ -62,7 +62,7 @@ export class MainScene extends Scene {
     this.taodanhsachke();
     this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
     this.agv = new Agv(this, 32, 32 * 14, this.pathLayer);
-    this.autoAgv = new AutoAgv(this, 32, 32 * 13, this.graph);
+    this.autoAgv = new AutoAgv(this, 4, 10, this.graph);
     this.agv.setPushable(false);
 
     this.saveButton = this.add.text(window.innerWidth - 200, 50, "Save data", {
