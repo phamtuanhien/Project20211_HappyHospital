@@ -3,7 +3,7 @@ import { Game, Types } from "phaser";
 import { MainScene } from "./scenes";
 
 const gameConfig: Types.Core.GameConfig = {
-  title: "Phaser game tutorial",
+  title: "Happy Hospital",
   type: Phaser.WEBGL,
   parent: "game",
   backgroundColor: "#777",

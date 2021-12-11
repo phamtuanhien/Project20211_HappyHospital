@@ -96,16 +96,18 @@ export class MainScene extends Scene {
   }
 
   private handleClickSaveButton() {
+    alert("Saved!");
     this.mapData = {};
     this.mapData.agv = this.agv;
     this.mapData.agents = this.agents;
 
     const objJSON = JSON.stringify(this.mapData);
-    const text = encodeURIComponent(objJSON);
+    const text = objJSON;
     const e = document.createElement("a");
     e.setAttribute(
       "href",
-      "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+      // "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+      "data:text/plain;charset=utf-8," + text
     );
     e.setAttribute("download", "save.json");
     e.style.display = "none";
@@ -115,17 +117,22 @@ export class MainScene extends Scene {
   }
 
   private handleClickLoadButton() {
-    console.log("hehe");
     const e = document.createElement("input");
     const reader = new FileReader();
     const openFile = (event: any) => {
       var input = event.target;
       reader.onload = () => {
         if (typeof reader?.result == "string") {
-          this.mapData = JSON.parse(decodeURIComponent(reader?.result));
+          // this.mapData = JSON.parse(decodeURIComponent(reader?.result));
+          this.mapData = JSON.parse(reader?.result);
           this.agv.setX(this.mapData.agv.x);
           this.agv.setY(this.mapData.agv.y);
-          console.log(this.mapData);
+          for (let i = 0; i < this.agents.length; i++) {
+            this.agents[i].setX(this.mapData.agents[i].x);
+            this.agents[i].setY(this.mapData.agents[i].y);
+          }
+          // console.log(this.mapData);
+          alert("Loaded!");
         }
       };
       reader.readAsText(input.files[0]);

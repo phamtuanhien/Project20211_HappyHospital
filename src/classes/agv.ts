@@ -48,15 +48,35 @@ export class Agv extends Actor {
     for (let i = 0; i < tiles.length; i++) {
       if (tiles[i].properties.direction == "top") {
         b = false;
+        if (this.keyS?.isDown) {
+          this.text.setTint(0xfff0000).setText("Can't Go").setX(this.x - 20);
+        } else {
+          this.text.clearTint().setText("AGV");
+        }
       }
       if (tiles[i].properties.direction == "left") {
         r = false;
+        if (this.keyD?.isDown){
+          this.text.setTint(0xfff0000).setText("Can't Go").setX(this.x - 20);
+        } else {
+          this.text.clearTint().setText("AGV");
+        }
       }
       if (tiles[i].properties.direction == "bottom") {
         t = false;
+        if (this.keyW?.isDown){
+          this.text.setTint(0xfff0000).setText("Can't Go").setX(this.x - 20);
+        } else {
+          this.text.clearTint().setText("AGV");
+        }
       }
       if (tiles[i].properties.direction == "right") {
         l = false;
+        if (this.keyA?.isDown){
+          this.text.setTint(0xfff0000).setText("Can't Go").setX(this.x - 20);
+        } else {
+          this.text.clearTint().setText("AGV");
+        }
       }
     }
 
