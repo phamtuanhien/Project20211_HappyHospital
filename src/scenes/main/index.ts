@@ -77,7 +77,7 @@ export class MainScene extends Scene {
       .setInteractive()
       .on("pointerdown", () => this.handleClickLoadButton());
 
-    this.initAgents(6, 1000000);
+    this.initAgents(6, 100000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
   }
@@ -118,6 +118,10 @@ export class MainScene extends Scene {
           this.mapData = JSON.parse(reader?.result);
           this.agv.setX(this.mapData.agv.x);
           this.agv.setY(this.mapData.agv.y);
+          for (let i = 0; i < this.agents.length; i++) {
+            this.agents[i].setX(this.mapData.agents[i].x);
+            this.agents[i].setY(this.mapData.agents[i].y);
+          }
           // console.log(this.mapData);
           alert("Loaded!");
         }
