@@ -3,9 +3,11 @@ export enum State {
   BUSY,
   NOT_ALLOW,
 }
+
+const lambda = 0.4;
 export class Nodee {
-  public x: number;
-  public y: number;
+  public x: number; // 0 <= x <= 52
+  public y: number; // 0 <= y <= 28
   public nodeW: Nodee | null = null;
   public nodeN: Nodee | null = null;
   public nodeS: Nodee | null = null;
@@ -14,42 +16,44 @@ export class Nodee {
   public w_edge_N: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w_edge_S: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w_edge_E: number = Number.MAX_SAFE_INTEGER; // trong so canh
-  public w: number = 0; // thời gian dự đoán dừng
-  public u: number = 0; // thời gian dừng thực tế
-  public state: State;
-  public p_random: number;
-  public t_random: number;
-
-  //bien cho A*
-  public astar_f = 0;
-  public astar_g = 0;
-  public astar_h = 0;
-  public previous?: Nodee;
+  public w: number = 0; // thời gian dự đoán dừng (ms)
+  public u: number = 0; // thời gian dừng thực tế (ms)
+  public state: State; // trạng thái nút
+  public p_random: number; // xác xuất nút chuyển sang trạng thái Busy
+  public t_min: number; // thời gian tối thiểu nút ở trạng thái busy (ms)
+  public t_max: number; // thời gian tối đa nút ở trạng thái busy (ms)
 
   constructor(
     x: number,
     y: number,
     state: State = State.NOT_ALLOW,
-    p_random: number = 0.05, // 0 < p_random < 1
-    t_random: number = 3 // thời gian randomBusy <= t
+    p_random: number = 0.05,
+    t_min: number = 2000,
+    t_max: number = 3000
   ) {
     this.x = x;
     this.y = y;
     this.state = state;
     this.p_random = p_random;
-    this.t_random = t_random;
-    // setInterval(() => {
-    //   if (this.state == State.EMPTY) {
-    //     let r = Math.random();
-    //     if (r < this.p_random) {
-    //       this.state = State.BUSY;
-    //       let r1 = Math.random() * this.t_random;
-    //       setTimeout(() => {
-    //         this.state = State.EMPTY;
-    //       }, r1 * 1000);
-    //     }
-    //   }
-    // }, 1000);
+    this.t_min = t_min;
+    this.t_max = t_max;
+
+    /**
+     * ngẫu nhiên chuyển node sang trạng thái BUSY
+     * trong khoảng thời gian ngẫu nhiên r1
+     */
+    setInterval(() => {
+      if (this.state == State.EMPTY) {
+        let r = Math.random();
+        if (r < this.p_random) {
+          let r1 = this.t_min + Math.random() * (this.t_max - this.t_min);
+          this.state = State.BUSY;
+          setTimeout(() => {
+            this.state = State.EMPTY;
+          }, r1);
+        }
+      }
+    }, 1000);
   }
 
   public setNeighbor(node: Nodee) {
@@ -74,5 +78,14 @@ export class Nodee {
 
   public equal(node: Nodee) {
     return this.x == node.x && this.y == node.y;
+  }
+
+  public setU(u: number) {
+    this.u = u;
+    this.updateW();
+  }
+
+  public updateW() {
+    this.w = (1 - lambda) * this.w + lambda * this.u;
   }
 }

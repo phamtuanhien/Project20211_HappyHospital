@@ -8,7 +8,7 @@ import { Graph } from "../../classes/graph";
 
 export class MainScene extends Scene {
   private agv!: Agv;
-  private autoAgv?: AutoAgv;
+  private autoAgv: AutoAgv | null = null;
   private agents!: Agent[];
   private map!: Tilemaps.Tilemap;
   private tileset!: Tilemaps.Tileset;
@@ -62,8 +62,9 @@ export class MainScene extends Scene {
     this.taodanhsachke();
     this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
     this.agv = new Agv(this, 32, 32 * 14, this.pathLayer);
-    this.autoAgv = new AutoAgv(this, 4, 10, this.graph);
     this.agv.setPushable(false);
+
+    this.createRandomAutoAgv();
 
     this.saveButton = this.add.text(window.innerWidth - 200, 50, "Save data", {
       backgroundColor: "#eee",
@@ -86,7 +87,7 @@ export class MainScene extends Scene {
       .setInteractive()
       .on("pointerdown", () => this.handleClickLoadButton());
 
-    // this.initAgents(10, 1000000);
+    this.initAgents(30, 1000000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
   }
@@ -115,7 +116,6 @@ export class MainScene extends Scene {
     e.click();
     document.body.removeChild(e);
   }
-
   private handleClickLoadButton() {
     const e = document.createElement("input");
     const reader = new FileReader();
@@ -188,13 +188,26 @@ export class MainScene extends Scene {
       });
   }
 
+  private createRandomAutoAgv() {
+    let r = Math.floor(Math.random() * this.pathPos.length);
+    if (this.graph) {
+      this.autoAgv = new AutoAgv(
+        this,
+        1,
+        13,
+        this.pathPos[r].x,
+        this.pathPos[r].y,
+        this.graph
+      );
+    }
+  }
+
   private initAgents(num: number, time: number): void {
     this.updateAgents(num);
     setInterval(() => {
       this.updateAgents(num);
     }, time);
   }
-
   private updateAgents(num: number): void {
     if (this.agents.length != 0) {
       for (let i = 0; i < this.agents.length; i++) {
@@ -217,7 +230,10 @@ export class MainScene extends Scene {
       );
       agent.setPushable(false);
       this.physics.add.collider(agent, this.roomLayer);
-      this.physics.add.collider(this.agv, agent, () => {});
+      this.physics.add.overlap(this.agv, agent, () => {
+        this.agv.handleOverlap();
+      });
+      this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
       this.agents.push(agent);
     }
   }

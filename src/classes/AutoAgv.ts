@@ -1,36 +1,109 @@
 import { Actor } from "./actor";
 import { Graph } from "./graph";
-import { Nodee } from "./node";
+import { Nodee, State } from "./node";
+const PriorityQueue = require("priorityqueuejs");
 
 export class AutoAgv extends Actor {
-  public toadoX: number;
-  public toadoY: number;
   public graph: Graph;
+  public path: Nodee[] | null;
+  public curNode: Nodee;
+  public endNode: Nodee;
+  public cur: number;
+  public waitT: number;
+  public sobuocdichuyen: number;
+  public thoigiandichuyen: number;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, graph: Graph) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    endX: number,
+    endY: number,
+    graph: Graph
+  ) {
     super(scene, x * 32, y * 32, "agv");
-    (this.toadoX = x), (this.toadoY = y);
     this.graph = graph;
     this.getBody().setSize(32, 32);
     this.setOrigin(0, 0);
-    let start = new Nodee(4, 10);
-    let end = new Nodee(17, 9);
-    this.calPathAStar(start, end);
+    this.cur = 0;
+    this.waitT = 0;
+    this.curNode = this.graph.nodes[x][y];
+    this.curNode.setState(State.BUSY);
+    this.endNode = this.graph.nodes[endX][endY];
+    this.path = this.calPathAStar(this.curNode, this.endNode);
+    this.sobuocdichuyen = 0;
+    this.thoigiandichuyen = performance.now();
   }
 
-  public calPathDijkstra(start: Nodee, end: Nodee) {
-    let queue = [];
-    queue.push(this.graph.nodes[start.x][start.y]);
-    while (queue.length > 0) {
-      let curNode = queue.shift();
-      if (curNode?.equal(end)) {
-        console.log("co duong");
-        break;
+  protected preUpdate(time: number, delta: number): void {
+    this.move();
+    // console.log(this.x, this.y);
+  }
+
+  public move() {
+    // nếu không có đường đi đến đích thì không làm gì
+    if (!this.path) return;
+
+    // nếu đã đến đích thì không làm gì
+    if (this.cur == this.path.length - 1) {
+      this.setVelocity(0, 0);
+      return;
+    }
+
+    // nodeNext: nút tiếp theo cần đến
+    let nodeNext: Nodee =
+      this.graph.nodes[this.path[this.cur + 1].x][this.path[this.cur + 1].y];
+    /**
+     * nếu nút tiếp theo đang ở trạng thái bận
+     * thì Agv chuyển sang trạng thái chờ
+     */
+    if (nodeNext.state == State.BUSY) {
+      this.setVelocity(0, 0);
+      if (this.waitT) return;
+      this.waitT = performance.now();
+    } else {
+      /**
+       * nếu Agv từ trạng thái chờ -> di chuyển
+       * thì cập nhật u cho node hiện tại
+       */
+      if (this.waitT) {
+        console.log(performance.now() - this.waitT);
+        this.curNode.setU((performance.now() - this.waitT) / 1000);
+        console.log(this.curNode);
+        console.log(this.graph);
+        this.waitT = 0;
+      }
+      // di chuyển đến nút tiếp theo
+      if (
+        Math.abs(this.x - nodeNext.x * 32) > 1 ||
+        Math.abs(this.y - nodeNext.y * 32) > 1
+      ) {
+        this.scene.physics.moveTo(this, nodeNext.x * 32, nodeNext.y * 32, 32);
       } else {
-        if (curNode?.nodeE != null) queue.push(curNode.nodeE);
-        if (curNode?.nodeS != null) queue.push(curNode.nodeS);
-        if (curNode?.nodeN != null) queue.push(curNode.nodeN);
-        if (curNode?.nodeW != null) queue.push(curNode.nodeW);
+        /**
+         * Khi đã đến nút tiếp theo thì cập nhật trạng thái
+         * cho nút trước đó, nút hiện tại và Agv
+         */
+        this.curNode.setState(State.EMPTY);
+        this.curNode = nodeNext;
+        this.curNode.setState(State.BUSY);
+        this.cur++;
+        this.setX(this.curNode.x * 32);
+        this.setY(this.curNode.y * 32);
+        this.setVelocity(0, 0);
+        this.sobuocdichuyen++;
+        console.log(this.sobuocdichuyen);
+
+        // cap nhat lai duong di Agv moi 10 buoc di chuyen;
+        // hoac sau 10s di chuyen
+        if (
+          this.sobuocdichuyen % 10 == 0 ||
+          performance.now() - this.thoigiandichuyen > 10000
+        ) {
+          this.thoigiandichuyen = performance.now();
+          this.cur = 0;
+          this.path = this.calPathAStar(this.curNode, this.endNode);
+        }
       }
     }
   }
@@ -40,14 +113,38 @@ export class AutoAgv extends Actor {
   }
 
   public calPathAStar(start: Nodee, end: Nodee): Nodee[] | null {
+    /**
+     * Khoi tao cac bien trong A*
+     */
     let openSet: Nodee[] = [];
     let closeSet: Nodee[] = [];
     let path: Nodee[] = [];
+    let astar_f: number[][] = new Array(this.graph.width);
+    let astar_g: number[][] = new Array(this.graph.width);
+    let astar_h: number[][] = new Array(this.graph.width);
+    let previous: Nodee[][] = new Array(this.graph.width);
+    for (let i = 0; i < this.graph.width; i++) {
+      astar_f[i] = new Array(this.graph.height);
+      astar_g[i] = new Array(this.graph.height);
+      astar_h[i] = new Array(this.graph.height);
+      previous[i] = new Array(this.graph.height);
+      for (let j = 0; j < this.graph.height; j++) {
+        astar_f[i][j] = 0;
+        astar_g[i][j] = 0;
+        astar_h[i][j] = 0;
+      }
+    }
+    /**
+     * Thuat toan
+     */
     openSet.push(this.graph.nodes[start.x][start.y]);
     while (openSet.length > 0) {
       let winner = 0;
       for (let i = 0; i < openSet.length; i++) {
-        if (openSet[i].astar_f < openSet[winner].astar_f) {
+        if (
+          astar_f[openSet[i].x][openSet[i].y] <
+          astar_f[openSet[winner].x][openSet[winner].y]
+        ) {
           winner = i;
         }
       }
@@ -57,9 +154,9 @@ export class AutoAgv extends Actor {
       if (openSet[winner].equal(end)) {
         let cur: Nodee = this.graph.nodes[end.x][end.y];
         path.push(cur);
-        while (cur.previous != undefined) {
-          path.push(cur.previous);
-          cur = cur.previous;
+        while (previous[cur.x][cur.y] != undefined) {
+          path.push(previous[cur.x][cur.y]);
+          cur = previous[cur.x][cur.y];
         }
         path.reverse();
         console.log(path);
@@ -79,18 +176,28 @@ export class AutoAgv extends Actor {
         const neighbor = neighbors[i];
         if (neighbor != null) {
           if (!this.isInclude(neighbor, closeSet)) {
-            let tempG = current.astar_g + 1;
+            let timexoay = 0;
+            if (
+              previous[current.x][current.y] &&
+              neighbor.x != previous[current.x][current.y].x &&
+              neighbor.y != previous[current.x][current.y].y
+            ) {
+              timexoay = 1;
+            }
+            let tempG =
+              astar_g[current.x][current.y] + 1 + current.w + timexoay;
             if (this.isInclude(neighbor, openSet)) {
-              if (tempG < neighbor.astar_g) {
-                neighbor.astar_g = tempG;
+              if (tempG < astar_g[neighbor.x][neighbor.y]) {
+                astar_g[neighbor.x][neighbor.y] = tempG;
               }
             } else {
-              neighbor.astar_g = tempG;
+              astar_g[neighbor.x][neighbor.y] = tempG;
               openSet.push(neighbor);
             }
-            neighbor.astar_h = this.heuristic(neighbor, end);
-            neighbor.astar_f = neighbor.astar_h + neighbor.astar_g;
-            neighbor.previous = current;
+            astar_h[neighbor.x][neighbor.y] = this.heuristic(neighbor, end);
+            astar_f[neighbor.x][neighbor.y] =
+              astar_h[neighbor.x][neighbor.y] + astar_g[neighbor.x][neighbor.y];
+            previous[neighbor.x][neighbor.y] = current;
           }
         }
       }

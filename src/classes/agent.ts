@@ -3,13 +3,14 @@ import { Actor } from "./actor";
 import { Position } from "./position";
 import { Text } from "./text";
 import { Astar } from "../algorithm/AStarSearch";
+import { Graph } from "./graph";
 export class Agent extends Actor {
   private startPos: Position;
   private endPos: Position;
   private groundPos: Position[];
   private path?: Position[];
   private vertexs: Position[];
-  private endText: Text;
+  // private endText: Text;
   private agentText: Text;
   private astar: Astar;
   private next: number = 1;
@@ -28,29 +29,35 @@ export class Agent extends Actor {
     this.path = [];
     this.vertexs = [];
 
-    this.endText = new Text(
-      this.scene,
-      endPos.x * 32 + 6,
-      endPos.y * 32,
-      id.toString(),
-      "28px"
-    );
-    this.scene.physics.add.overlap(this, this.endText, () => {
-      console.log(this.endText.text);
-    });
+    // this.endText = new Text(
+    //   this.scene,
+    //   endPos.x * 32 + 6,
+    //   endPos.y * 32,
+    //   id.toString(),
+    //   "28px"
+    // );
+    // this.scene.physics.add.overlap(this, this.endText, () => {
+    //   console.log(this.endText.text);
+    // });
     this.agentText = new Text(
       this.scene,
-      startPos.x * 32 + 10,
+      startPos.x * 32,
       startPos.y * 32 - 16,
       id.toString()
     );
 
     this.astar = new Astar(52, 28, startPos, endPos, groundPos);
     this.path = this.astar.cal();
-    console.log("-------------------------------------------------");
-    console.log("[Agent] Start: (%d, %d), End: (%d, %d)", startPos.x, startPos.y, endPos.x, endPos.y);
-    console.log(this.path);
-    
+    // console.log("-------------------------------------------------");
+    // console.log(
+    //   "[Agent] Start: (%d, %d), End: (%d, %d)",
+    //   startPos.x,
+    //   startPos.y,
+    //   endPos.x,
+    //   endPos.y
+    // );
+    // console.log(this.path);
+
     this.initVertexs();
 
     // PHYSICS
@@ -97,9 +104,10 @@ export class Agent extends Actor {
       this.scene.physics.moveTo(
         this,
         this.vertexs[this.next].x * 32,
-        this.vertexs[this.next].y * 32
+        this.vertexs[this.next].y * 32,
+        32
       );
-      this.agentText.setX(this.x + 9);
+      this.agentText.setX(this.x);
       this.agentText.setY(this.y - 16);
     } else {
       this.next++;
@@ -172,7 +180,7 @@ export class Agent extends Actor {
   }
 
   public terminate() {
-    this.endText.destroy();
+    // this.endText.destroy();
     this.agentText.destroy();
     this.destroy();
   }
