@@ -14,7 +14,7 @@ export class Agent extends Actor {
   private agentText: Text;
   private astar: Astar;
   private next: number = 1;
-
+  private id: number;
   constructor(
     scene: Phaser.Scene,
     startPos: Position,
@@ -28,6 +28,7 @@ export class Agent extends Actor {
     this.groundPos = groundPos;
     this.path = [];
     this.vertexs = [];
+    this.id = id;
 
     // this.endText = new Text(
     //   this.scene,
@@ -187,5 +188,20 @@ export class Agent extends Actor {
 
   preUpdate(): void {
     this.goToDestinationByVertexs();
+  }
+
+  public getStartPos(): Position {
+    return this.startPos;
+  }
+  public getEndPos(): Position {
+    return this.endPos;
+  }
+  public getId(): number {
+    return this.id;
+  }
+
+  public destroyy() {
+    this.agentText.destroy();
+    this.destroy();
   }
 }

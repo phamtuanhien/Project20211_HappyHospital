@@ -100,7 +100,21 @@ export class MainScene extends Scene {
     alert("Saved!");
     this.mapData = {};
     this.mapData.agv = this.agv;
-    this.mapData.agents = this.agents;
+    let saveAgents = [];
+    for (let i = 0; i < this.agents.length; i++) {
+      saveAgents.push({
+        startPos: {
+          x: this.agents[i].getStartPos().x,
+          y: this.agents[i].getStartPos().y,
+        },
+        endPos: {
+          x: this.agents[i].getEndPos().x,
+          y: this.agents[i].getEndPos().y,
+        },
+        id: this.agents[i].getId(),
+      });
+    }
+    this.mapData.agents = saveAgents;
 
     const objJSON = JSON.stringify(this.mapData);
     const text = objJSON;
@@ -115,6 +129,7 @@ export class MainScene extends Scene {
     document.body.appendChild(e);
     e.click();
     document.body.removeChild(e);
+    console.log(text);
   }
   private handleClickLoadButton() {
     const e = document.createElement("input");
@@ -127,11 +142,24 @@ export class MainScene extends Scene {
           this.mapData = JSON.parse(reader?.result);
           this.agv.setX(this.mapData.agv.x);
           this.agv.setY(this.mapData.agv.y);
+
           for (let i = 0; i < this.agents.length; i++) {
-            this.agents[i].setX(this.mapData.agents[i].x);
-            this.agents[i].setY(this.mapData.agents[i].y);
+            this.agents[i].destroyy();
+            this.agents[i] = new Agent(
+              this,
+              new Position(
+                this.mapData.agents[i].startPos.x,
+                this.mapData.agents[i].startPos.y
+              ),
+              new Position(
+                this.mapData.agents[i].endPos.x,
+                this.mapData.agents[i].endPos.y
+              ),
+              this.groundPos,
+              this.mapData.agents[i].id
+            );
           }
-          // console.log(this.mapData);
+          console.log(this.mapData);
           alert("Loaded!");
         }
       };
