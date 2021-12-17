@@ -67,10 +67,10 @@ export class AutoAgv extends Actor {
        * thì cập nhật u cho node hiện tại
        */
       if (this.waitT) {
-        console.log(performance.now() - this.waitT);
+        // console.log(performance.now() - this.waitT);
         this.curNode.setU((performance.now() - this.waitT) / 1000);
-        console.log(this.curNode);
-        console.log(this.graph);
+        // console.log(this.curNode);
+        // console.log(this.graph);
         this.waitT = 0;
       }
       // di chuyển đến nút tiếp theo
@@ -92,7 +92,7 @@ export class AutoAgv extends Actor {
         this.setY(this.curNode.y * 32);
         this.setVelocity(0, 0);
         this.sobuocdichuyen++;
-        console.log(this.sobuocdichuyen);
+        // console.log(this.sobuocdichuyen);
 
         // cap nhat lai duong di Agv moi 10 buoc di chuyen;
         // hoac sau 10s di chuyen
@@ -159,7 +159,7 @@ export class AutoAgv extends Actor {
           cur = previous[cur.x][cur.y];
         }
         path.reverse();
-        console.log(path);
+        // console.log(path);
         return path;
       }
 
@@ -202,7 +202,7 @@ export class AutoAgv extends Actor {
         }
       }
     }
-    console.log("path not found!");
+    console.log("Path not found!");
     return null;
   }
 

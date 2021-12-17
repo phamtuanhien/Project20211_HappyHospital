@@ -32,6 +32,6 @@ export class Graph {
     for (let p of pathPos) {
       this.nodes[p.x][p.y].setState(State.EMPTY);
     }
-    console.log(this.nodes);
+    // console.log(this.nodes);
   }
 }

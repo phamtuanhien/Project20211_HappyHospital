@@ -5,6 +5,7 @@ import { Position } from "../../classes/position";
 import { AutoAgv } from "../../classes/AutoAgv";
 import { Nodee } from "../../classes/node";
 import { Graph } from "../../classes/graph";
+import { read } from "fs";
 
 export class MainScene extends Scene {
   private agv!: Agv;
@@ -129,41 +130,50 @@ export class MainScene extends Scene {
     document.body.appendChild(e);
     e.click();
     document.body.removeChild(e);
-    console.log(text);
+    // console.log(text);
   }
   private handleClickLoadButton() {
     const e = document.createElement("input");
     const reader = new FileReader();
     const openFile = (event: any) => {
       var input = event.target;
-      reader.onload = () => {
-        if (typeof reader?.result == "string") {
-          // this.mapData = JSON.parse(decodeURIComponent(reader?.result));
-          this.mapData = JSON.parse(reader?.result);
-          this.agv.setX(this.mapData.agv.x);
-          this.agv.setY(this.mapData.agv.y);
+      var fileTypes = 'json';
+      if (input.files && input.files[0]) {
+        var extension = input.files[0].name.split('.').pop().toLowerCase(),
+        isSuccess = fileTypes.indexOf(extension) > -1;
 
-          for (let i = 0; i < this.agents.length; i++) {
-            this.agents[i].destroyy();
-            this.agents[i] = new Agent(
-              this,
-              new Position(
-                this.mapData.agents[i].startPos.x,
-                this.mapData.agents[i].startPos.y
-              ),
-              new Position(
-                this.mapData.agents[i].endPos.x,
-                this.mapData.agents[i].endPos.y
-              ),
-              this.groundPos,
-              this.mapData.agents[i].id
-            );
-          }
-          console.log(this.mapData);
-          alert("Loaded!");
+        if (isSuccess) {
+          reader.onload = () => {
+            if (typeof reader?.result == "string") {
+              this.mapData = JSON.parse(reader?.result);
+              this.agv.setX(this.mapData.agv.x);
+              this.agv.setY(this.mapData.agv.y);
+
+              for (let i = 0; i < this.agents.length; i++) {
+                this.agents[i].destroyy();
+                this.agents[i] = new Agent(
+                  this,
+                  new Position(
+                    this.mapData.agents[i].startPos.x,
+                    this.mapData.agents[i].startPos.y
+                  ),
+                  new Position(
+                    this.mapData.agents[i].endPos.x,
+                    this.mapData.agents[i].endPos.y
+                  ),
+                  this.groundPos,
+                  this.mapData.agents[i].id
+                );
+              }
+              // console.log(this.mapData);
+              alert("Loaded!");
+            } 
+          };
+          reader.readAsText(input.files[0]);
+        } else { 
+          alert("Error!");
         }
-      };
-      reader.readAsText(input.files[0]);
+      }
     };
     e.type = "file";
     e.style.display = "none";
