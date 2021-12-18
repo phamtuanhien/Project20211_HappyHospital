@@ -27,6 +27,7 @@ export class MainScene extends Scene {
   private danhsachke: Position[][][];
   private saveButton?: Phaser.GameObjects.Text;
   private loadButton?: Phaser.GameObjects.Text;
+  private applyButton?: Phaser.GameObjects.Text;
   private mapData: any = {};
   private graph?: Graph;
 
@@ -81,12 +82,28 @@ export class MainScene extends Scene {
       fontSize: "24px",
       fontStyle: "bold",
     });
+    this.applyButton = this.add.text(window.innerWidth - 155, 240, "Apply", {
+      backgroundColor: "#eee",
+      padding: { bottom: 5, top: 5, left: 10, right: 10 },
+      color: "#000",
+      fontSize: "18px",
+      fontStyle: "bold",
+    });
     this.saveButton
       .setInteractive()
       .on("pointerdown", () => this.handleClickSaveButton());
     this.loadButton
       .setInteractive()
       .on("pointerdown", () => this.handleClickLoadButton());
+    this.applyButton
+    .setInteractive()
+    .on("pointerdown", () => this.handleClickApplyButton());      
+
+    this.add.text(window.innerWidth - 250, 200, "Number of agents:", {
+      color: "#eee",
+      fontSize: "18px",
+      fontStyle: "bold",
+    });
 
     this.initAgents(30, 1000000);
 
@@ -182,6 +199,11 @@ export class MainScene extends Scene {
     e.click();
     document.body.removeChild(e);
   }
+
+  private handleClickApplyButton() {
+    // this.initAgents(30, 1000000);
+    alert("Applied");
+  }  
 
   private initMap(): void {
     this.map = this.make.tilemap({
