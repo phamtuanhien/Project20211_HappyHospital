@@ -15,6 +15,8 @@ export class Agent extends Actor {
   private astar: Astar;
   private next: number = 1;
   private id: number;
+  public isOverlap: boolean = false;
+
   constructor(
     scene: Phaser.Scene,
     startPos: Position,
@@ -62,40 +64,46 @@ export class Agent extends Actor {
     this.initVertexs();
 
     // PHYSICS
-    this.getBody().setSize(25, 25);
+    this.getBody().setSize(31, 31);
     this.setOrigin(0, 0);
   }
 
-  public goToDestinationByPath() {
-    if (!this.path) return;
-    if (this.next == this.path?.length) return;
-    if (this.x != this.path[this.next].x * 32) {
-      if (this.x < this.path[this.next].x * 32) {
-        this.x += 2;
-        this.agentText.x += 2;
-      } else {
-        this.x -= 2;
-        this.agentText.x -= 2;
-      }
-    } else if (this.y != this.path[this.next].y * 32) {
-      if (this.y < this.path[this.next].y * 32) {
-        this.y += 2;
-        this.agentText.y += 2;
-      } else {
-        this.y -= 2;
-        this.agentText.y -= 2;
-      }
-    } else {
-      this.next++;
-    }
-  }
+  // public goToDestinationByPath() {
+  //   if (!this.path) return;
+  //   if (this.next == this.path?.length) return;
+  //   if (this.x != this.path[this.next].x * 32) {
+  //     if (this.x < this.path[this.next].x * 32) {
+  //       this.x += 2;
+  //       this.agentText.x += 2;
+  //     } else {
+  //       this.x -= 2;
+  //       this.agentText.x -= 2;
+  //     }
+  //   } else if (this.y != this.path[this.next].y * 32) {
+  //     if (this.y < this.path[this.next].y * 32) {
+  //       this.y += 2;
+  //       this.agentText.y += 2;
+  //     } else {
+  //       this.y -= 2;
+  //       this.agentText.y -= 2;
+  //     }
+  //   } else {
+  //     this.next++;
+  //   }
+  // }
 
   public goToDestinationByVertexs() {
     if (this.next == this.vertexs.length) {
       this.agentText.setText("DONE");
       this.agentText.setFontSize(12);
       this.agentText.setX(this.x - 1);
+      this.x = this.vertexs[this.vertexs.length - 1].x * 32;
+      this.y = this.vertexs[this.vertexs.length - 1].y * 32;
       this.setVelocity(0, 0);
+      setTimeout(() => {
+        this.agentText.destroy();
+        this.destroy();
+      }, 1000);
       return;
     }
     if (
@@ -203,5 +211,31 @@ export class Agent extends Actor {
   public destroyy() {
     this.agentText.destroy();
     this.destroy();
+  }
+
+  public pause() {
+    this.setVelocity(0, 0);
+    this.setActive(false);
+  }
+  public restart() {
+    this.setActive(true);
+  }
+
+  public handleOverlap() {
+    if (this.isOverlap) return;
+    this.isOverlap = true;
+    setTimeout(() => {
+      this.isOverlap = false;
+    }, 4000);
+    let r = Math.random();
+    if (r < 0.5) {
+      return;
+    } else {
+      this.setVelocity(0, 0);
+      this.setActive(false);
+      setTimeout(() => {
+        this.setActive(true);
+      }, 2000);
+    }
   }
 }

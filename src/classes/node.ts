@@ -42,18 +42,18 @@ export class Nodee {
      * ngẫu nhiên chuyển node sang trạng thái BUSY
      * trong khoảng thời gian ngẫu nhiên r1
      */
-    setInterval(() => {
-      if (this.state == State.EMPTY) {
-        let r = Math.random();
-        if (r < this.p_random) {
-          let r1 = this.t_min + Math.random() * (this.t_max - this.t_min);
-          this.state = State.BUSY;
-          setTimeout(() => {
-            this.state = State.EMPTY;
-          }, r1);
-        }
-      }
-    }, 1000);
+    // setInterval(() => {
+    //   if (this.state == State.EMPTY) {
+    //     let r = Math.random();
+    //     if (r < this.p_random) {
+    //       let r1 = this.t_min + Math.random() * (this.t_max - this.t_min);
+    //       this.state = State.BUSY;
+    //       setTimeout(() => {
+    //         this.state = State.EMPTY;
+    //       }, r1);
+    //     }
+    //   }
+    // }, 1000);
   }
 
   public setNeighbor(node: Nodee) {

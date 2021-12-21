@@ -1,10 +1,14 @@
 import { Position } from "./position";
 import { Nodee, State } from "./node";
+import { Agent } from "./agent";
 
 export class Graph {
   public nodes: Nodee[][];
   public width: number;
   public height: number;
+  public agents: Agent[] = [];
+  public busy: number[][] = [];
+  public pathPos: Position[];
 
   constructor(
     width: number,
@@ -15,6 +19,7 @@ export class Graph {
     this.width = width;
     this.height = height;
     this.nodes = new Array(width);
+    this.pathPos = pathPos;
     for (let i = 0; i < width; i++) {
       this.nodes[i] = [];
       for (let j = 0; j < height; j++) {
@@ -33,5 +38,71 @@ export class Graph {
       this.nodes[p.x][p.y].setState(State.EMPTY);
     }
     // console.log(this.nodes);
+
+    this.busy = new Array(52);
+    for (let i = 0; i < 52; i++) {
+      this.busy[i] = new Array(28);
+      for (let j = 0; j < 28; j++) {
+        if (this.nodes[i][j].state === State.EMPTY) {
+          this.busy[i][j] = 0;
+        } else {
+          this.busy[i][j] = 2;
+        }
+      }
+    }
+  }
+
+  public setAgents(agents: Agent[]): void {
+    for (let p of this.pathPos) {
+      this.nodes[p.x][p.y].setState(State.EMPTY);
+    }
+    this.busy = new Array(52);
+    for (let i = 0; i < 52; i++) {
+      this.busy[i] = new Array(28);
+      for (let j = 0; j < 28; j++) {
+        if (this.nodes[i][j].state == State.EMPTY) {
+          this.busy[i][j] = 0;
+        } else {
+          this.busy[i][j] = 2;
+        }
+      }
+    }
+    this.agents = agents;
+  }
+
+  public updateState(): void {
+    let cur = new Array(52);
+    for (let i = 0; i < 52; i++) {
+      cur[i] = new Array(28);
+      for (let j = 0; j < 28; j++) {
+        cur[i][j] = 0;
+      }
+    }
+    for (let i = 0; i < this.agents.length; i++) {
+      let agent = this.agents[i];
+      let xl = Math.floor(agent.x / 32);
+      let xr = Math.floor((agent.x + 31) / 32);
+      let yt = Math.floor(agent.y / 32);
+      let yb = Math.floor((agent.y + 31) / 32);
+      cur[xl][yt] = 1;
+      cur[xl][yb] = 1;
+      cur[xr][yt] = 1;
+      cur[xr][yb] = 1;
+    }
+    for (let i = 0; i < 52; i++) {
+      for (let j = 0; j < 28; j++) {
+        if (this.busy[i][j] === 2) {
+          continue;
+        } else if (this.busy[i][j] === 0) {
+          if ((cur[i][j] = 0)) continue;
+          this.nodes[i][j].setState(State.BUSY);
+          this.busy[i][j] = 1;
+        } else {
+          if (cur[i][j] === 1) continue;
+          this.nodes[i][j].setState(State.EMPTY);
+          this.busy[i][j] = 0;
+        }
+      }
+    }
   }
 }

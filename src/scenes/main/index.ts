@@ -68,6 +68,14 @@ export class MainScene extends Scene {
 
     this.createRandomAutoAgv();
 
+    this.createAgents(30, 30000);
+
+    this.physics.add.collider(this.agv, this.noPathLayer);
+
+    this.addButton();
+  }
+
+  addButton(): void {
     this.saveButton = this.add.text(window.innerWidth - 200, 50, "Save data", {
       backgroundColor: "#eee",
       padding: { bottom: 5, top: 5, left: 10, right: 10 },
@@ -96,21 +104,18 @@ export class MainScene extends Scene {
       .setInteractive()
       .on("pointerdown", () => this.handleClickLoadButton());
     this.applyButton
-    .setInteractive()
-    .on("pointerdown", () => this.handleClickApplyButton());      
+      .setInteractive()
+      .on("pointerdown", () => this.handleClickApplyButton());
 
     this.add.text(window.innerWidth - 250, 200, "Number of agents:", {
       color: "#eee",
       fontSize: "18px",
       fontStyle: "bold",
     });
-
-    this.initAgents(30, 1000000);
-
-    this.physics.add.collider(this.agv, this.noPathLayer);
   }
 
   update(): void {
+    this.graph?.updateState();
     this.agv.update();
   }
 
@@ -154,10 +159,10 @@ export class MainScene extends Scene {
     const reader = new FileReader();
     const openFile = (event: any) => {
       var input = event.target;
-      var fileTypes = 'json';
+      var fileTypes = "json";
       if (input.files && input.files[0]) {
-        var extension = input.files[0].name.split('.').pop().toLowerCase(),
-        isSuccess = fileTypes.indexOf(extension) > -1;
+        var extension = input.files[0].name.split(".").pop().toLowerCase(),
+          isSuccess = fileTypes.indexOf(extension) > -1;
 
         if (isSuccess) {
           reader.onload = () => {
@@ -184,10 +189,10 @@ export class MainScene extends Scene {
               }
               // console.log(this.mapData);
               alert("Loaded!");
-            } 
+            }
           };
           reader.readAsText(input.files[0]);
-        } else { 
+        } else {
           alert("Error!");
         }
       }
@@ -199,11 +204,10 @@ export class MainScene extends Scene {
     e.click();
     document.body.removeChild(e);
   }
-
   private handleClickApplyButton() {
     // this.initAgents(30, 1000000);
     alert("Applied");
-  }  
+  }
 
   private initMap(): void {
     this.map = this.make.tilemap({
@@ -262,7 +266,7 @@ export class MainScene extends Scene {
     }
   }
 
-  private initAgents(num: number, time: number): void {
+  private createAgents(num: number, time: number): void {
     this.updateAgents(num);
     setInterval(() => {
       this.updateAgents(num);
@@ -291,11 +295,13 @@ export class MainScene extends Scene {
       agent.setPushable(false);
       this.physics.add.collider(agent, this.roomLayer);
       this.physics.add.overlap(this.agv, agent, () => {
+        agent.handleOverlap();
         this.agv.handleOverlap();
       });
       this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
       this.agents.push(agent);
     }
+    this.graph?.setAgents(this.agents);
   }
 
   private taodanhsachke() {

@@ -9,7 +9,7 @@ export class Agv extends Actor {
   private keyS: Phaser.Input.Keyboard.Key;
   private keyD: Phaser.Input.Keyboard.Key;
   private pathLayer: Tilemaps.TilemapLayer;
-  private isImmortal: boolean = false; // biến cần cho xử lý overlap =))
+  public isImmortal: boolean = false; // biến cần cho xử lý overlap =))
   private isDisable: boolean = false; // biến cần cho xử lý overlap =))
 
   constructor(

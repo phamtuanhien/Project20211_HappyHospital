@@ -1,4 +1,5 @@
 import { Actor } from "./actor";
+import { Text } from "./text";
 import { Graph } from "./graph";
 import { Nodee, State } from "./node";
 const PriorityQueue = require("priorityqueuejs");
@@ -30,6 +31,7 @@ export class AutoAgv extends Actor {
     this.curNode = this.graph.nodes[x][y];
     this.curNode.setState(State.BUSY);
     this.endNode = this.graph.nodes[endX][endY];
+    new Text(this.scene, endX * 32, endY * 32, "DES", "16px", "#F00");
     this.path = this.calPathAStar(this.curNode, this.endNode);
     this.sobuocdichuyen = 0;
     this.thoigiandichuyen = performance.now();
@@ -42,7 +44,9 @@ export class AutoAgv extends Actor {
 
   public move() {
     // nếu không có đường đi đến đích thì không làm gì
-    if (!this.path) return;
+    if (!this.path) {
+      return;
+    }
 
     // nếu đã đến đích thì không làm gì
     if (this.cur == this.path.length - 1) {

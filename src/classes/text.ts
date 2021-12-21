@@ -6,11 +6,12 @@ export class Text extends GameObjects.Text {
     x: number,
     y: number,
     text: string,
-    fontSize: string = "16px"
+    fontSize: string = "16px",
+    color?: string
   ) {
     super(scene, x, y, text, {
       fontSize: fontSize,
-      color: "#fff",
+      color: color ? color : "#fff",
       stroke: "#000",
       strokeThickness: 4,
     });
