@@ -10,7 +10,8 @@
     "esModuleInterop": true,
     "target": "es5",
     "allowJs": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "outDir": "out"
   },
   "include": ["./index.d.ts", "**/*.ts"],
   "exclude": ["node_modules", "./dist/"]
