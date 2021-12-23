@@ -120,7 +120,7 @@ export class MainScene extends Scene {
   }
 
   private handleClickSaveButton() {
-    alert("Saved!");
+    alert("Đã lưu map thành công!");
     this.mapData = {};
     this.mapData.agv = this.agv;
     let saveAgents = [];
@@ -188,12 +188,12 @@ export class MainScene extends Scene {
                 );
               }
               // console.log(this.mapData);
-              alert("Loaded!");
+              alert("Đã tải map thành công!");
             }
           };
           reader.readAsText(input.files[0]);
         } else {
-          alert("Error!");
+          alert("File không đúng định dạng. Vui lòng chọn file .json!");
         }
       }
     };
