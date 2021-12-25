@@ -46,6 +46,13 @@ export class MainScene extends Scene {
   }
 
   preload(): void {
+    this.load.scenePlugin({
+      key: 'rexuiplugin',
+      url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+      sceneKey: 'rexUI'
+    });
+    this.load.plugin('rextexteditplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js', true);
+    this.load.plugin('rexinputtextplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexinputtextplugin.min.js', true);
     this.load.baseURL = "assets/";
     this.load.image({
       key: "tiles",
@@ -107,11 +114,41 @@ export class MainScene extends Scene {
       .setInteractive()
       .on("pointerdown", () => this.handleClickApplyButton());
 
-    this.add.text(window.innerWidth - 250, 200, "Number of agents:", {
+    this.add.text(window.innerWidth - 230, 200, "Number of agents:", {
       color: "#eee",
       fontSize: "18px",
       fontStyle: "bold",
     });
+
+    const numAgentInput = this.add.text(window.innerWidth - 40, 200, "", {
+      color: "#ff0",
+      fontSize: "18px",
+      fontStyle: "bold",
+    });
+
+    numAgentInput.setInteractive().on('pointerdown', () => {
+      const inputText = this.rexUI.edit(numAgentInput
+        // , {
+        //     id: "numAgentEdit",
+        //     type: "number"
+        // }
+      ).on('textchange', (inputText: any) => {
+            numAgentInput.text = inputText.text;
+      });
+
+    });
+    // const inputText = this.add.rexInputText(this, window.innerWidth - 40, 200, 10, 10, {
+    //   id: 'numAgents',
+    //   type: 'number',
+    //   fontSize: '18px',
+    //   })
+    //   .resize(100, 100)
+    //   .setOrigin(0.5)
+    //   .on('textchange', (inputText: any) => {
+    //     numAgentInput.text = inputText.text;
+    //   });
+
+    numAgentInput.setText("" + this.agents.length);
   }
 
   update(): void {
@@ -206,7 +243,7 @@ export class MainScene extends Scene {
   }
   private handleClickApplyButton() {
     // this.initAgents(30, 1000000);
-    alert("Applied");
+    alert("Đã thiết lập thành công");
   }
 
   private initMap(): void {

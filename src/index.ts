@@ -1,12 +1,15 @@
 import { Game, Types } from "phaser";
-
 import { MainScene } from "./scenes";
+import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 const gameConfig: Types.Core.GameConfig = {
   title: "Happy Hospital",
   type: Phaser.WEBGL,
   parent: "game",
   backgroundColor: "#777",
+  dom: {
+    createContainer: true
+  },    
   scale: {
     mode: Phaser.Scale.ScaleModes.NONE,
     width: window.innerWidth,
@@ -33,6 +36,14 @@ const gameConfig: Types.Core.GameConfig = {
     disableWebAudio: false,
   },
   scene: [MainScene],
+  plugins: {
+    scene: [{
+        key: 'rexUI',
+        plugin: UIPlugin,
+        mapping: 'rexUI'
+    },
+  ]
+}
 };
 
 window.sizeChanged = () => {

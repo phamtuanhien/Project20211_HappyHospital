@@ -36,6 +36,56 @@ export class Agv extends Actor {
     return this.pathLayer.getTilesWithinWorldXY(this.x, this.y, 31, 31);
   }
 
+  public ToastInvalidMove() {
+    const toast = this.scene.rexUI.add.toast({
+      x: 800,
+      y: window.innerHeight - 35,
+      orientation: 0,
+      background: this.scene.rexUI.add.roundRectangle(0, 0, 2, 2, 20, 0xffffff),
+      text: this.scene.add.text(0, 0, "", {
+          fontSize: "24px",
+          color: "#000000"
+      }),
+      space: {
+          left: 10,
+          right: 10,
+          top: 10,
+          bottom: 10,
+      },
+      duration: {
+        in: 0,
+        hold: 500,
+        out: 0,
+      },
+    })
+      .showMessage("Di chuyển không hợp lệ!");
+  }
+
+  public ToastOverLay() {
+    this.scene.rexUI.add.toast({
+      x: 800,
+      y: window.innerHeight - 35,
+
+      background: this.scene.rexUI.add.roundRectangle(0, 0, 2, 2, 20, 0xffffff),
+      text: this.scene.add.text(0, 0, "", {
+          fontSize: "24px",
+          color: "#000000"
+      }),
+      space: {
+          left: 10,
+          right: 10,
+          top: 10,
+          bottom: 10,
+      },
+      duration: {
+        in: 0,
+        hold: 100,
+        out: 0,
+      },
+    })
+      .showMessage("AGV va chạm với Agent!")
+  }
+
   update(): void {
     this.getBody().setVelocity(0);
     this.text.setPosition(this.x, this.y - this.height * 0.5);
@@ -53,45 +103,25 @@ export class Agv extends Actor {
       if (tiles[i].properties.direction == "top") {
         b = false;
         if (this.keyS?.isDown) {
-          this.text
-            .setTint(0xfff0000)
-            .setText("Can't Go")
-            .setX(this.x - 20);
-        } else {
-          this.text.clearTint().setText("AGV");
-        }
+          this.ToastInvalidMove();
+        } 
       }
       if (tiles[i].properties.direction == "left") {
         r = false;
         if (this.keyD?.isDown) {
-          this.text
-            .setTint(0xfff0000)
-            .setText("Can't Go")
-            .setX(this.x - 20);
-        } else {
-          this.text.clearTint().setText("AGV");
+          this.ToastInvalidMove();
         }
       }
       if (tiles[i].properties.direction == "bottom") {
         t = false;
         if (this.keyW?.isDown) {
-          this.text
-            .setTint(0xfff0000)
-            .setText("Can't Go")
-            .setX(this.x - 20);
-        } else {
-          this.text.clearTint().setText("AGV");
+          this.ToastInvalidMove();
         }
       }
       if (tiles[i].properties.direction == "right") {
         l = false;
         if (this.keyA?.isDown) {
-          this.text
-            .setTint(0xfff0000)
-            .setText("Can't Go")
-            .setX(this.x - 20);
-        } else {
-          this.text.clearTint().setText("AGV");
+          this.ToastInvalidMove();
         }
       }
     }
@@ -132,6 +162,7 @@ export class Agv extends Actor {
   }
 
   public handleOverlap() {
+    this.ToastOverLay();
     if (!this.isImmortal) {
       this.isDisable = true;
       setTimeout(() => {
