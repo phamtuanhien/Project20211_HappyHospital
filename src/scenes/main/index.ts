@@ -75,7 +75,7 @@ export class MainScene extends Scene {
 
     this.createRandomAutoAgv();
 
-    this.createAgents(30, 30000);
+    this.createAgents(100, 30000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
 
@@ -309,6 +309,7 @@ export class MainScene extends Scene {
       this.updateAgents(num);
     }, time);
   }
+
   private updateAgents(num: number): void {
     if (this.agents.length != 0) {
       for (let i = 0; i < this.agents.length; i++) {
@@ -341,6 +342,60 @@ export class MainScene extends Scene {
     this.graph?.setAgents(this.agents);
   }
 
+  private checkTilesUndirection(tileA: Tilemaps.Tile, tileB: Tilemaps.Tile) : boolean{
+    if (tileA.x == tileB.x && tileA.y == tileB.y + 1) {
+      if (tileB.properties.direction == "top" || !tileB.properties.direction) {
+        return true;
+      }
+    }
+    if (tileA.x + 1 == tileB.x && tileA.y == tileB.y) {
+      if (tileB.properties.direction == "right" || !tileB.properties.direction) {
+        return true;
+      }
+    }
+    if (tileA.x == tileB.x && tileA.y + 1 == tileB.y) {
+      if (tileB.properties.direction == "bottom" || !tileB.properties.direction) {
+         return true;
+      }
+    }
+    if (tileA.x == tileB.x + 1 && tileA.y == tileB.y) {
+      if (tileB.properties.direction == "left" || !tileB.properties.direction) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private checkTilesNeighbor(tileA: Tilemaps.Tile, tileB: Tilemaps.Tile): boolean {
+    // neu o dang xet khong co huong
+    if (!tileA.properties.direction) {
+      if(this.checkTilesUndirection(tileA, tileB))
+        return true;      
+    } else {// neu o dang xet co huong
+      if (tileA.properties.direction == "top") {
+        if (tileA.x == tileB.x && tileA.y == tileB.y + 1){ /*&& tileA.properties.direction != "bottom"*/
+          return true;
+        }
+      }
+      if (tileA.properties.direction == "right") {
+        if (tileA.x + 1 == tileB.x && tileA.y == tileB.y){ /*&& tileA.properties.direction != "left"*/
+          return true;
+        }
+      }
+      if (tileA.properties.direction == "bottom") {
+        if (tileA.x == tileB.x && tileA.y + 1 == tileB.y){ /*&& tileA.properties.direction != "top") {*/
+          return true;
+        }
+      }
+      if (tileA.properties.direction == "left") {
+        if (tileA.x == tileB.x + 1 && tileA.y == tileB.y){ /*&& tileA.properties.direction != "right") {*/
+           return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private taodanhsachke() {
     let tiles: Tilemaps.Tile[] = [];
     this.pathLayer
@@ -352,95 +407,10 @@ export class MainScene extends Scene {
     for (let i = 0; i < tiles.length; i++) {
       for (let j = 0; j < tiles.length; j++) {
         if (i != j) {
-          // neu o dang xet khong co huong
-          if (!tiles[i].properties.direction) {
-            if (tiles[i].x == tiles[j].x && tiles[i].y == tiles[j].y + 1) {
-              if (
-                tiles[j].properties.direction == "top" ||
-                !tiles[j].properties.direction
-              ) {
-                this.danhsachke[tiles[i].x][tiles[i].y].push(
-                  new Position(tiles[j].x, tiles[j].y)
-                );
-              }
-            }
-            if (tiles[i].x + 1 == tiles[j].x && tiles[i].y == tiles[j].y) {
-              if (
-                tiles[j].properties.direction == "right" ||
-                !tiles[j].properties.direction
-              ) {
-                this.danhsachke[tiles[i].x][tiles[i].y].push(
-                  new Position(tiles[j].x, tiles[j].y)
-                );
-              }
-            }
-            if (tiles[i].x == tiles[j].x && tiles[i].y + 1 == tiles[j].y) {
-              if (
-                tiles[j].properties.direction == "bottom" ||
-                !tiles[j].properties.direction
-              ) {
-                this.danhsachke[tiles[i].x][tiles[i].y].push(
-                  new Position(tiles[j].x, tiles[j].y)
-                );
-              }
-            }
-            if (tiles[i].x == tiles[j].x + 1 && tiles[i].y == tiles[j].y) {
-              if (
-                tiles[j].properties.direction == "left" ||
-                !tiles[j].properties.direction
-              ) {
-                this.danhsachke[tiles[i].x][tiles[i].y].push(
-                  new Position(tiles[j].x, tiles[j].y)
-                );
-              }
-            }
-          }
-          // neu o dang xet co huong
-          else {
-            if (tiles[i].properties.direction == "top") {
-              if (
-                tiles[i].x == tiles[j].x &&
-                tiles[i].y == tiles[j].y + 1 &&
-                tiles[i].properties.direction != "bottom"
-              ) {
-                this.danhsachke[tiles[i].x][tiles[i].y].push(
-                  new Position(tiles[j].x, tiles[j].y)
-                );
-              }
-            }
-            if (tiles[i].properties.direction == "right") {
-              if (
-                tiles[i].x + 1 == tiles[j].x &&
-                tiles[i].y == tiles[j].y &&
-                tiles[i].properties.direction != "left"
-              ) {
-                this.danhsachke[tiles[i].x][tiles[i].y].push(
-                  new Position(tiles[j].x, tiles[j].y)
-                );
-              }
-            }
-            if (tiles[i].properties.direction == "bottom") {
-              if (
-                tiles[i].x == tiles[j].x &&
-                tiles[i].y + 1 == tiles[j].y &&
-                tiles[i].properties.direction != "top"
-              ) {
-                this.danhsachke[tiles[i].x][tiles[i].y].push(
-                  new Position(tiles[j].x, tiles[j].y)
-                );
-              }
-            }
-            if (tiles[i].properties.direction == "left") {
-              if (
-                tiles[i].x == tiles[j].x + 1 &&
-                tiles[i].y == tiles[j].y &&
-                tiles[i].properties.direction != "right"
-              ) {
-                this.danhsachke[tiles[i].x][tiles[i].y].push(
-                  new Position(tiles[j].x, tiles[j].y)
-                );
-              }
-            }
+          if(this.checkTilesNeighbor(tiles[i], tiles[j])){
+            this.danhsachke[tiles[i].x][tiles[i].y].push(
+              new Position(tiles[j].x, tiles[j].y)
+            );
           }
         }
       }
