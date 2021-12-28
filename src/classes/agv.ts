@@ -11,16 +11,37 @@ export class Agv extends Actor {
   private pathLayer: Tilemaps.TilemapLayer;
   public isImmortal: boolean = false; // biến cần cho xử lý overlap =))
   private isDisable: boolean = false; // biến cần cho xử lý overlap =))
-
+  private desX: number;
+  private desY: number;
+  private desText: Text;
   constructor(
     scene: Phaser.Scene,
     x: number,
     y: number,
+    desX: number,
+    desY: number,
     pathLayer: Tilemaps.TilemapLayer
   ) {
     super(scene, x, y, "agv");
+    this.desX = desX;
+    this.desY = desY;
     this.pathLayer = pathLayer;
-    this.text = new Text(this.scene, this.x, this.y - this.height * 0.5, "AGV");
+    this.text = new Text(
+      this.scene,
+      this.x,
+      this.y - this.height * 0.5,
+      "AGV",
+      "16px",
+      "#00FF00"
+    );
+    this.desText = new Text(
+      this.scene,
+      this.desX,
+      this.desY,
+      "DES",
+      "16px",
+      "#00FF00"
+    );
     // KEYS
     this.keyW = this.scene.input.keyboard.addKey("W");
     this.keyA = this.scene.input.keyboard.addKey("A");
@@ -37,53 +58,69 @@ export class Agv extends Actor {
   }
 
   public ToastInvalidMove() {
-    const toast = this.scene.rexUI.add.toast({
-      x: 800,
-      y: window.innerHeight - 35,
-      orientation: 0,
-      background: this.scene.rexUI.add.roundRectangle(0, 0, 2, 2, 20, 0xffffff),
-      text: this.scene.add.text(0, 0, "", {
+    const toast = this.scene.rexUI.add
+      .toast({
+        x: 800,
+        y: window.innerHeight - 35,
+        orientation: 0,
+        background: this.scene.rexUI.add.roundRectangle(
+          0,
+          0,
+          2,
+          2,
+          20,
+          0xffffff
+        ),
+        text: this.scene.add.text(0, 0, "", {
           fontSize: "24px",
-          color: "#000000"
-      }),
-      space: {
+          color: "#000000",
+        }),
+        space: {
           left: 10,
           right: 10,
           top: 10,
           bottom: 10,
-      },
-      duration: {
-        in: 0,
-        hold: 500,
-        out: 0,
-      },
-    })
+        },
+        duration: {
+          in: 0,
+          hold: 500,
+          out: 0,
+        },
+      })
       .showMessage("Di chuyển không hợp lệ!");
   }
 
   public ToastOverLay() {
-    this.scene.rexUI.add.toast({
-      x: 800,
-      y: window.innerHeight - 35,
+    this.scene.rexUI.add
+      .toast({
+        x: 800,
+        y: window.innerHeight - 35,
 
-      background: this.scene.rexUI.add.roundRectangle(0, 0, 2, 2, 20, 0xffffff),
-      text: this.scene.add.text(0, 0, "", {
+        background: this.scene.rexUI.add.roundRectangle(
+          0,
+          0,
+          2,
+          2,
+          20,
+          0xffffff
+        ),
+        text: this.scene.add.text(0, 0, "", {
           fontSize: "24px",
-          color: "#000000"
-      }),
-      space: {
+          color: "#000000",
+        }),
+        space: {
           left: 10,
           right: 10,
           top: 10,
           bottom: 10,
-      },
-      duration: {
-        in: 0,
-        hold: 100,
-        out: 0,
-      },
-    })
-      .showMessage("AGV va chạm với Agent!")
+        },
+        duration: {
+          in: 0,
+          hold: 100,
+          out: 0,
+        },
+      })
+      .showMessage("AGV va chạm với Agent!");
   }
 
   update(): void {
@@ -104,7 +141,7 @@ export class Agv extends Actor {
         b = false;
         if (this.keyS?.isDown) {
           this.ToastInvalidMove();
-        } 
+        }
       }
       if (tiles[i].properties.direction == "left") {
         r = false;

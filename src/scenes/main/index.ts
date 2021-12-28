@@ -80,7 +80,16 @@ export class MainScene extends Scene {
     this.initMap();
     this.taodanhsachke();
     this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
-    this.agv = new Agv(this, 32, 32 * 14, this.pathLayer);
+
+    let r = Math.floor(Math.random() * this.pathPos.length);
+    this.agv = new Agv(
+      this,
+      1 * 32,
+      14 * 32,
+      this.pathPos[r].x * 32,
+      this.pathPos[r].y * 32,
+      this.pathLayer
+    );
     this.agv.setPushable(false);
 
     this.createRandomAutoAgv();
