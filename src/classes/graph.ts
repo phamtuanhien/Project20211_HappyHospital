@@ -105,4 +105,11 @@ export class Graph {
       }
     }
   }
+
+  public removeAgent(agent: Agent): void {
+    let i = agent.x / 32;
+    let j = agent.y / 32;
+    this.nodes[i][j].setState(State.EMPTY);
+    this.busy[i][j] = 0;
+  }
 }

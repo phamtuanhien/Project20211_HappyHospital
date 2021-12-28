@@ -10,7 +10,6 @@ import { read } from "fs";
 export class MainScene extends Scene {
   private agv!: Agv;
   private autoAgv: AutoAgv | null = null;
-  private agents!: Agent[];
   private map!: Tilemaps.Tilemap;
   private tileset!: Tilemaps.Tileset;
   private groundLayer!: Tilemaps.TilemapLayer;
@@ -31,6 +30,9 @@ export class MainScene extends Scene {
   private mapData: any = {};
   private graph?: Graph;
 
+  private agents!: Agent[];
+  private maxNumOfAgent: number = 20;
+
   constructor() {
     super("main-scene");
     this.agents = new Array();
@@ -47,12 +49,20 @@ export class MainScene extends Scene {
 
   preload(): void {
     this.load.scenePlugin({
-      key: 'rexuiplugin',
-      url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
-      sceneKey: 'rexUI'
+      key: "rexuiplugin",
+      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
+      sceneKey: "rexUI",
     });
-    this.load.plugin('rextexteditplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js', true);
-    this.load.plugin('rexinputtextplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexinputtextplugin.min.js', true);
+    this.load.plugin(
+      "rextexteditplugin",
+      "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js",
+      true
+    );
+    this.load.plugin(
+      "rexinputtextplugin",
+      "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexinputtextplugin.min.js",
+      true
+    );
     this.load.baseURL = "assets/";
     this.load.image({
       key: "tiles",
@@ -75,11 +85,21 @@ export class MainScene extends Scene {
 
     this.createRandomAutoAgv();
 
-    this.createAgents(100, 30000);
+    this.events.on("destroyAgent", this.destroyAgentHandler, this);
+    this.createAgents(10, 600000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
 
     this.addButton();
+  }
+
+  private destroyAgentHandler(agent: Agent) {
+    let index = 0;
+    for (let i = 0; i < this.agents.length; i++) {
+      if (this.agents[i].getId() == agent.getId()) index = i;
+    }
+    this.agents.splice(index, 1);
+    this.graph?.removeAgent(agent);
   }
 
   addButton(): void {
@@ -126,16 +146,18 @@ export class MainScene extends Scene {
       fontStyle: "bold",
     });
 
-    numAgentInput.setInteractive().on('pointerdown', () => {
-      const inputText = this.rexUI.edit(numAgentInput
-        // , {
-        //     id: "numAgentEdit",
-        //     type: "number"
-        // }
-      ).on('textchange', (inputText: any) => {
-            numAgentInput.text = inputText.text;
-      });
-
+    numAgentInput.setInteractive().on("pointerdown", () => {
+      const inputText = this.rexUI
+        .edit(
+          numAgentInput
+          // , {
+          //     id: "numAgentEdit",
+          //     type: "number"
+          // }
+        )
+        .on("textchange", (inputText: any) => {
+          numAgentInput.text = inputText.text;
+        });
     });
     // const inputText = this.add.rexInputText(this, window.innerWidth - 40, 200, 10, 10, {
     //   id: 'numAgents',
@@ -296,8 +318,10 @@ export class MainScene extends Scene {
         this,
         1,
         13,
-        this.pathPos[r].x,
-        this.pathPos[r].y,
+        46,
+        2,
+        // this.pathPos[r].x,
+        // this.pathPos[r].y,
         this.graph
       );
     }
@@ -313,7 +337,7 @@ export class MainScene extends Scene {
   private updateAgents(num: number): void {
     if (this.agents.length != 0) {
       for (let i = 0; i < this.agents.length; i++) {
-        this.agents[i].terminate();
+        this.agents[i].destroyy();
       }
     }
     let randoms = [];
@@ -342,20 +366,29 @@ export class MainScene extends Scene {
     this.graph?.setAgents(this.agents);
   }
 
-  private checkTilesUndirection(tileA: Tilemaps.Tile, tileB: Tilemaps.Tile) : boolean{
+  private checkTilesUndirection(
+    tileA: Tilemaps.Tile,
+    tileB: Tilemaps.Tile
+  ): boolean {
     if (tileA.x == tileB.x && tileA.y == tileB.y + 1) {
       if (tileB.properties.direction == "top" || !tileB.properties.direction) {
         return true;
       }
     }
     if (tileA.x + 1 == tileB.x && tileA.y == tileB.y) {
-      if (tileB.properties.direction == "right" || !tileB.properties.direction) {
+      if (
+        tileB.properties.direction == "right" ||
+        !tileB.properties.direction
+      ) {
         return true;
       }
     }
     if (tileA.x == tileB.x && tileA.y + 1 == tileB.y) {
-      if (tileB.properties.direction == "bottom" || !tileB.properties.direction) {
-         return true;
+      if (
+        tileB.properties.direction == "bottom" ||
+        !tileB.properties.direction
+      ) {
+        return true;
       }
     }
     if (tileA.x == tileB.x + 1 && tileA.y == tileB.y) {
@@ -366,30 +399,37 @@ export class MainScene extends Scene {
     return false;
   }
 
-  private checkTilesNeighbor(tileA: Tilemaps.Tile, tileB: Tilemaps.Tile): boolean {
+  private checkTilesNeighbor(
+    tileA: Tilemaps.Tile,
+    tileB: Tilemaps.Tile
+  ): boolean {
     // neu o dang xet khong co huong
     if (!tileA.properties.direction) {
-      if(this.checkTilesUndirection(tileA, tileB))
-        return true;      
-    } else {// neu o dang xet co huong
+      if (this.checkTilesUndirection(tileA, tileB)) return true;
+    } else {
+      // neu o dang xet co huong
       if (tileA.properties.direction == "top") {
-        if (tileA.x == tileB.x && tileA.y == tileB.y + 1){ /*&& tileA.properties.direction != "bottom"*/
+        if (tileA.x == tileB.x && tileA.y == tileB.y + 1) {
+          /*&& tileA.properties.direction != "bottom"*/
           return true;
         }
       }
       if (tileA.properties.direction == "right") {
-        if (tileA.x + 1 == tileB.x && tileA.y == tileB.y){ /*&& tileA.properties.direction != "left"*/
+        if (tileA.x + 1 == tileB.x && tileA.y == tileB.y) {
+          /*&& tileA.properties.direction != "left"*/
           return true;
         }
       }
       if (tileA.properties.direction == "bottom") {
-        if (tileA.x == tileB.x && tileA.y + 1 == tileB.y){ /*&& tileA.properties.direction != "top") {*/
+        if (tileA.x == tileB.x && tileA.y + 1 == tileB.y) {
+          /*&& tileA.properties.direction != "top") {*/
           return true;
         }
       }
       if (tileA.properties.direction == "left") {
-        if (tileA.x == tileB.x + 1 && tileA.y == tileB.y){ /*&& tileA.properties.direction != "right") {*/
-           return true;
+        if (tileA.x == tileB.x + 1 && tileA.y == tileB.y) {
+          /*&& tileA.properties.direction != "right") {*/
+          return true;
         }
       }
     }
@@ -407,13 +447,40 @@ export class MainScene extends Scene {
     for (let i = 0; i < tiles.length; i++) {
       for (let j = 0; j < tiles.length; j++) {
         if (i != j) {
-          if(this.checkTilesNeighbor(tiles[i], tiles[j])){
+          if (this.checkTilesNeighbor(tiles[i], tiles[j])) {
             this.danhsachke[tiles[i].x][tiles[i].y].push(
               new Position(tiles[j].x, tiles[j].y)
             );
           }
         }
       }
+    }
+  }
+
+  private agentsHandler() {}
+
+  private initialAgents() {
+    for (let i = 0; i < this.maxNumOfAgent / 2; i++) {
+      let startIndex = Math.floor(Math.random() * this.groundPos.length);
+      let endIndex = Math.floor(Math.random() * this.groundPos.length);
+      while (endIndex === startIndex) {
+        endIndex = Math.floor(Math.random() * this.groundPos.length);
+      }
+      let agent = new Agent(
+        this,
+        this.groundPos[startIndex],
+        this.groundPos[endIndex],
+        this.groundPos,
+        i
+      );
+      agent.setPushable(false);
+      this.physics.add.collider(agent, this.roomLayer);
+      this.physics.add.overlap(this.agv, agent, () => {
+        agent.handleOverlap();
+        this.agv.handleOverlap();
+      });
+      this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
+      this.agents.push(agent);
     }
   }
 }

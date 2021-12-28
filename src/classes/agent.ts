@@ -10,7 +10,7 @@ export class Agent extends Actor {
   private groundPos: Position[];
   private path?: Position[];
   private vertexs: Position[];
-  // private endText: Text;
+  private endText: Text;
   private agentText: Text;
   private astar: Astar;
   private next: number = 1;
@@ -32,16 +32,16 @@ export class Agent extends Actor {
     this.vertexs = [];
     this.id = id;
 
-    // this.endText = new Text(
-    //   this.scene,
-    //   endPos.x * 32 + 6,
-    //   endPos.y * 32,
-    //   id.toString(),
-    //   "28px"
-    // );
-    // this.scene.physics.add.overlap(this, this.endText, () => {
-    //   console.log(this.endText.text);
-    // });
+    this.endText = new Text(
+      this.scene,
+      endPos.x * 32 + 6,
+      endPos.y * 32,
+      id.toString(),
+      "28px"
+    );
+    this.scene.physics.add.overlap(this, this.endText, () => {
+      console.log(this.endText.text);
+    });
     this.agentText = new Text(
       this.scene,
       startPos.x * 32,
@@ -100,10 +100,7 @@ export class Agent extends Actor {
       this.x = this.vertexs[this.vertexs.length - 1].x * 32;
       this.y = this.vertexs[this.vertexs.length - 1].y * 32;
       this.setVelocity(0, 0);
-      setTimeout(() => {
-        this.agentText.destroy();
-        this.destroy();
-      }, 1000);
+      this.destroyy();
       return;
     }
     if (
@@ -188,12 +185,6 @@ export class Agent extends Actor {
     }
   }
 
-  public terminate() {
-    // this.endText.destroy();
-    this.agentText.destroy();
-    this.destroy();
-  }
-
   preUpdate(): void {
     this.goToDestinationByVertexs();
   }
@@ -209,6 +200,8 @@ export class Agent extends Actor {
   }
 
   public destroyy() {
+    this.scene.events.emit("destroyAgent", this);
+    this.endText.destroy();
     this.agentText.destroy();
     this.destroy();
   }
