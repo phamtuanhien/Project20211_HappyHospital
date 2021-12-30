@@ -95,7 +95,7 @@ export class MainScene extends Scene {
     this.createRandomAutoAgv();
 
     this.events.on("destroyAgent", this.destroyAgentHandler, this);
-    this.createAgents(10, 600000);
+    this.createAgents(100, 600000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
 
@@ -240,7 +240,7 @@ export class MainScene extends Scene {
               this.agv.setY(this.mapData.agv.y);
 
               for (let i = 0; i < this.agents.length; i++) {
-                this.agents[i].destroyy();
+                this.agents[i].eliminate();
                 this.agents[i] = new Agent(
                   this,
                   new Position(
@@ -346,7 +346,7 @@ export class MainScene extends Scene {
   private updateAgents(num: number): void {
     if (this.agents.length != 0) {
       for (let i = 0; i < this.agents.length; i++) {
-        this.agents[i].destroyy();
+        this.agents[i].eliminate();
       }
     }
     let randoms = [];

@@ -100,7 +100,7 @@ export class Agent extends Actor {
       this.x = this.vertexs[this.vertexs.length - 1].x * 32;
       this.y = this.vertexs[this.vertexs.length - 1].y * 32;
       this.setVelocity(0, 0);
-      this.destroyy();
+      this.eliminate();
       return;
     }
     if (
@@ -199,7 +199,7 @@ export class Agent extends Actor {
     return this.id;
   }
 
-  public destroyy() {
+  public eliminate() {
     this.scene.events.emit("destroyAgent", this);
     this.endText.destroy();
     this.agentText.destroy();
