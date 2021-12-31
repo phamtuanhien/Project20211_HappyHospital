@@ -15,6 +15,7 @@ Nếu như trình duyệt mở file `index.html` thay vì redirect đến `http:
 - Người chơi sẽ được thi đua với các AGV do máy (AI) điều khiển. Việc phải về đích với thứ hạng cao là một trong các nhiệm vụ nữa của người chơi
 - Để điều khiển AGV, người chơi cần dùng các phím `W A S D` trên bàn phím để di chuyển lên/trái/xuống/phải AGV
 - Để di chuyển AGV rẽ sang hướng khác cần `nhấn giữ đồng thời 2 nút` trên bàn phím
+
   **Ví dụ:** Như hình dưới đây, để rẽ sang phải chúng ta cần nhấn giữ đồng thời 2 nút `S D`
   <p align="center">
     <img src="https://i.imgur.com/b9Dh1t8.png" alt="Hướng dẫn di chuyển AGV rẽ sang bên phải"/>
