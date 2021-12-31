@@ -74,6 +74,7 @@ export class MainScene extends Scene {
       frameWidth: 32,
       frameHeight: 32,
     });
+    this.load.image("instruction","sprites/instruction.png");
   }
 
   create(): void {
@@ -95,11 +96,13 @@ export class MainScene extends Scene {
     this.createRandomAutoAgv();
 
     this.events.on("destroyAgent", this.destroyAgentHandler, this);
-    this.createAgents(100, 600000);
+    this.createAgents(50, 100000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
 
     this.addButton();
+
+    this.openLinkInstruction();
   }
 
   private destroyAgentHandler(agent: Agent) {
@@ -180,6 +183,11 @@ export class MainScene extends Scene {
     //   });
 
     numAgentInput.setText("" + this.agents.length);
+  }
+
+  openLinkInstruction() {
+    const instruction = this.add.image(window.innerWidth - 125, window.innerHeight - 90, "instruction").setInteractive();
+    instruction.on("pointerup", () => { window.open('https://github.com/phamtuanhien/Project20211_HappyHospital#readme'); });
   }
 
   update(): void {
