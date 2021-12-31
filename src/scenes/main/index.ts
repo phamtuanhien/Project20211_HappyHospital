@@ -6,6 +6,7 @@ import { AutoAgv } from "../../classes/AutoAgv";
 import { Nodee } from "../../classes/node";
 import { Graph } from "../../classes/graph";
 import { read } from "fs";
+import {RandomDistribution} from "../../algorithm/random";
 
 export class MainScene extends Scene {
   private agv!: Agv;
@@ -29,6 +30,7 @@ export class MainScene extends Scene {
   private applyButton?: Phaser.GameObjects.Text;
   private mapData: any = {};
   private graph?: Graph;
+  private doorPos!: Position[];
 
   private agents!: Agent[];
   private maxNumOfAgent: number = 20;
@@ -39,6 +41,7 @@ export class MainScene extends Scene {
     this.groundPos = new Array();
     this.pathPos = new Array();
     this.danhsachke = new Array(52);
+    this.doorPos = new Array();
     for (let i = 0; i < this.danhsachke.length; i++) {
       this.danhsachke[i] = new Array(28);
       for (let j = 0; j < this.danhsachke[i].length; j++) {
@@ -96,7 +99,8 @@ export class MainScene extends Scene {
     this.createRandomAutoAgv();
 
     this.events.on("destroyAgent", this.destroyAgentHandler, this);
-    this.createAgents(50, 100000);
+
+    this.createAgents(1, 900);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
 
@@ -318,7 +322,8 @@ export class MainScene extends Scene {
       .forEach((v) => {
         const pos: Position = new Position(v.x, v.y);
         this.groundPos.push(pos);
-      });
+    });
+
     this.pathLayer
       .getTilesWithin()
       .filter((v) => v.index != -1)
@@ -326,6 +331,22 @@ export class MainScene extends Scene {
         const pos: Position = new Position(v.x, v.y);
         this.pathPos.push(pos);
       });
+
+    this.doorLayer
+      .getTilesWithin()
+      .filter((v) => v.index != -1)
+      .forEach((v) => {
+        const pos: Position = new Position(v.x, v.y);
+        this.doorPos.push(pos);
+    });
+    
+    this.gateLayer
+      .getTilesWithin()
+      .filter((v) => v.index != -1)
+      .forEach((v) => {
+        const pos: Position = new Position(v.x, v.y);
+        this.doorPos.push(pos);
+    });
   }
 
   private createRandomAutoAgv() {
@@ -352,6 +373,12 @@ export class MainScene extends Scene {
   }
 
   private updateAgents(num: number): void {
+    var rand = new RandomDistribution();
+    var ran = rand.getProbability();
+    if(ran > 1)
+      console.log(rand.getName() + ' ' + ran);
+    if(ran > 0.37)
+      return;
     if (this.agents.length != 0) {
       for (let i = 0; i < this.agents.length; i++) {
         this.agents[i].eliminate();
@@ -359,15 +386,15 @@ export class MainScene extends Scene {
     }
     let randoms = [];
     while (randoms.length < num * 2) {
-      var r = Math.floor(Math.random() * this.groundPos.length);
+      var r = Math.floor(Math.random() * this.doorPos.length);
       if (randoms.indexOf(r) === -1) randoms.push(r);
     }
     this.agents = [];
     for (let i = 0; i < num; i++) {
       let agent = new Agent(
         this,
-        this.groundPos[randoms[i]],
-        this.groundPos[randoms[i + num]],
+        this.doorPos[randoms[i]],
+        this.doorPos[randoms[i + num]],
         this.groundPos,
         i
       );
