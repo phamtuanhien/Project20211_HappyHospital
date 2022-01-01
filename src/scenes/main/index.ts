@@ -6,7 +6,7 @@ import { AutoAgv } from "../../classes/AutoAgv";
 import { Nodee } from "../../classes/node";
 import { Graph } from "../../classes/graph";
 import { read } from "fs";
-import {RandomDistribution} from "../../algorithm/random";
+import { RandomDistribution } from "../../algorithm/random";
 
 export class MainScene extends Scene {
   private agv!: Agv;
@@ -33,7 +33,7 @@ export class MainScene extends Scene {
   private doorPos!: Position[];
 
   private agents!: Agent[];
-  private maxNumOfAgent: number = 20;
+  private MAX_AGENT: number = 20;
 
   constructor() {
     super("main-scene");
@@ -77,7 +77,7 @@ export class MainScene extends Scene {
       frameWidth: 32,
       frameHeight: 32,
     });
-    this.load.image("instruction","sprites/instruction.png");
+    this.load.image("instruction", "sprites/instruction.png");
   }
 
   create(): void {
@@ -100,13 +100,69 @@ export class MainScene extends Scene {
 
     this.events.on("destroyAgent", this.destroyAgentHandler, this);
 
-    this.createAgents(1, 900);
+    this.createAgents1(10, 1000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
 
     this.addButton();
 
     this.openLinkInstruction();
+  }
+
+  createAgents1(numAgentInit: number, time: number) {
+    // khoi tao numAgentInit dau tien
+    let randoms = [];
+    while (randoms.length < numAgentInit * 2) {
+      var r = Math.floor(Math.random() * this.doorPos.length);
+      if (randoms.indexOf(r) === -1) randoms.push(r);
+    }
+    this.agents = [];
+    for (let i = 0; i < numAgentInit; i++) {
+      let agent = new Agent(
+        this,
+        this.doorPos[randoms[i]],
+        this.doorPos[randoms[i + numAgentInit]],
+        this.groundPos,
+        Math.floor(Math.random() * 100)
+      );
+      agent.setPushable(false);
+      this.physics.add.collider(agent, this.roomLayer);
+      this.physics.add.overlap(this.agv, agent, () => {
+        agent.handleOverlap();
+        this.agv.handleOverlap();
+      });
+      this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
+      this.agents.push(agent);
+    }
+    this.graph?.setAgents(this.agents);
+
+    // thêm ngẫu nhiên agent vào môi trường
+    setInterval(() => {
+      if (this.agents.length >= this.MAX_AGENT) return;
+
+      var rand = new RandomDistribution();
+      var ran = rand.getProbability();
+      if (ran > 1) console.log(rand.getName() + " " + ran);
+      if (ran > 0.37) return;
+      var r1 = Math.floor(Math.random() * this.doorPos.length);
+      var r2 = Math.floor(Math.random() * this.doorPos.length);
+      let agent = new Agent(
+        this,
+        this.doorPos[r1],
+        this.doorPos[r2],
+        this.groundPos,
+        Math.floor(Math.random() * 100)
+      );
+      agent.setPushable(false);
+      this.physics.add.collider(agent, this.roomLayer);
+      this.physics.add.overlap(this.agv, agent, () => {
+        agent.handleOverlap();
+        this.agv.handleOverlap();
+      });
+      this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
+      this.agents.push(agent);
+      this.graph?.setAgents(this.agents);
+    }, time);
   }
 
   private destroyAgentHandler(agent: Agent) {
@@ -190,8 +246,14 @@ export class MainScene extends Scene {
   }
 
   openLinkInstruction() {
-    const instruction = this.add.image(window.innerWidth - 125, window.innerHeight - 90, "instruction").setInteractive();
-    instruction.on("pointerup", () => { window.open('https://github.com/phamtuanhien/Project20211_HappyHospital#readme'); });
+    const instruction = this.add
+      .image(window.innerWidth - 125, window.innerHeight - 90, "instruction")
+      .setInteractive();
+    instruction.on("pointerup", () => {
+      window.open(
+        "https://github.com/phamtuanhien/Project20211_HappyHospital#readme"
+      );
+    });
   }
 
   update(): void {
@@ -322,7 +384,7 @@ export class MainScene extends Scene {
       .forEach((v) => {
         const pos: Position = new Position(v.x, v.y);
         this.groundPos.push(pos);
-    });
+      });
 
     this.pathLayer
       .getTilesWithin()
@@ -338,15 +400,15 @@ export class MainScene extends Scene {
       .forEach((v) => {
         const pos: Position = new Position(v.x, v.y);
         this.doorPos.push(pos);
-    });
-    
+      });
+
     this.gateLayer
       .getTilesWithin()
       .filter((v) => v.index != -1)
       .forEach((v) => {
         const pos: Position = new Position(v.x, v.y);
         this.doorPos.push(pos);
-    });
+      });
   }
 
   private createRandomAutoAgv() {
@@ -363,51 +425,6 @@ export class MainScene extends Scene {
         this.graph
       );
     }
-  }
-
-  private createAgents(num: number, time: number): void {
-    this.updateAgents(num);
-    setInterval(() => {
-      this.updateAgents(num);
-    }, time);
-  }
-
-  private updateAgents(num: number): void {
-    var rand = new RandomDistribution();
-    var ran = rand.getProbability();
-    if(ran > 1)
-      console.log(rand.getName() + ' ' + ran);
-    if(ran > 0.37)
-      return;
-    if (this.agents.length != 0) {
-      for (let i = 0; i < this.agents.length; i++) {
-        this.agents[i].eliminate();
-      }
-    }
-    let randoms = [];
-    while (randoms.length < num * 2) {
-      var r = Math.floor(Math.random() * this.doorPos.length);
-      if (randoms.indexOf(r) === -1) randoms.push(r);
-    }
-    this.agents = [];
-    for (let i = 0; i < num; i++) {
-      let agent = new Agent(
-        this,
-        this.doorPos[randoms[i]],
-        this.doorPos[randoms[i + num]],
-        this.groundPos,
-        i
-      );
-      agent.setPushable(false);
-      this.physics.add.collider(agent, this.roomLayer);
-      this.physics.add.overlap(this.agv, agent, () => {
-        agent.handleOverlap();
-        this.agv.handleOverlap();
-      });
-      this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
-      this.agents.push(agent);
-    }
-    this.graph?.setAgents(this.agents);
   }
 
   private checkTilesUndirection(
@@ -498,33 +515,6 @@ export class MainScene extends Scene {
           }
         }
       }
-    }
-  }
-
-  private agentsHandler() {}
-
-  private initialAgents() {
-    for (let i = 0; i < this.maxNumOfAgent / 2; i++) {
-      let startIndex = Math.floor(Math.random() * this.groundPos.length);
-      let endIndex = Math.floor(Math.random() * this.groundPos.length);
-      while (endIndex === startIndex) {
-        endIndex = Math.floor(Math.random() * this.groundPos.length);
-      }
-      let agent = new Agent(
-        this,
-        this.groundPos[startIndex],
-        this.groundPos[endIndex],
-        this.groundPos,
-        i
-      );
-      agent.setPushable(false);
-      this.physics.add.collider(agent, this.roomLayer);
-      this.physics.add.overlap(this.agv, agent, () => {
-        agent.handleOverlap();
-        this.agv.handleOverlap();
-      });
-      this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
-      this.agents.push(agent);
     }
   }
 }
