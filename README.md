@@ -20,3 +20,5 @@ Nếu như trình duyệt mở file `index.html` thay vì redirect đến `http:
   <p align="center">
     <img src="https://i.imgur.com/b9Dh1t8.png" alt="Hướng dẫn di chuyển AGV rẽ sang bên phải"/>
   </p>
+
+### Link chơi game: https://happyhospital.herokuapp.com/
