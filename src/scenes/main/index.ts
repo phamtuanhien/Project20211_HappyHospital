@@ -31,6 +31,8 @@ export class MainScene extends Scene {
   private mapData: any = {};
   private graph?: Graph;
   private doorPos!: Position[];
+  private timeText?: Phaser.GameObjects.Text;
+  private sec: number = 0 ;
 
   private agents!: Agent[];
   private MAX_AGENT: number = 20;
@@ -107,6 +109,22 @@ export class MainScene extends Scene {
     this.addButton();
 
     this.openLinkInstruction();
+
+    setInterval(() => {
+      this.sec++;
+      this.timeText?.setText(MainScene.secondsToHMS(this.sec));
+    }, 1000 );
+  }
+
+  public static secondsToHMS(seconds : number) : string {
+    var h = Math.floor(seconds % (3600*24) / 3600);
+    var m = Math.floor(seconds % 3600 / 60);
+    var s = Math.floor(seconds % 60);
+    
+    var hDisplay = h >= 10 ? h : ("0" + h);
+    var mDisplay = m >= 10 ? m : ("0" + m);
+    var sDisplay = s >= 10 ? s : ("0" + s);
+    return hDisplay + ":" + mDisplay + ":" + sDisplay;
   }
 
   createAgents1(numAgentInit: number, time: number) {
@@ -243,6 +261,12 @@ export class MainScene extends Scene {
     //   });
 
     numAgentInput.setText("" + this.agents.length);
+
+    this.timeText = this.add.text(window.innerWidth - 190, 290, "00:00:00", {
+      color: "#D8202A",
+      fontSize: "28px",
+      fontStyle: "bold"
+    });
   }
 
   openLinkInstruction() {
