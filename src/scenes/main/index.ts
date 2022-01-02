@@ -103,7 +103,7 @@ export class MainScene extends Scene {
 
     this.events.on("destroyAgent", this.destroyAgentHandler, this);
 
-    this.createAgents1(10, 1000);
+    this.createAgents(10, 1000);
 
     this.physics.add.collider(this.agv, this.noPathLayer);
 
@@ -128,7 +128,7 @@ export class MainScene extends Scene {
     return hDisplay + ":" + mDisplay + ":" + sDisplay;
   }
 
-  createAgents1(numAgentInit: number, time: number) {
+  createAgents(numAgentInit: number, time: number) {
     // khoi tao numAgentInit dau tien
     let randoms = [];
     while (randoms.length < numAgentInit * 2) {
