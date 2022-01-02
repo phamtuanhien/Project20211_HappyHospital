@@ -35,6 +35,7 @@ export class AutoAgv extends Actor {
     this.path = this.calPathAStar(this.curNode, this.endNode);
     this.sobuocdichuyen = 0;
     this.thoigiandichuyen = performance.now();
+    this.estimateArrivalTime(x*32, y*32, endX*32, endY*32);
   }
 
   protected preUpdate(time: number, delta: number): void {

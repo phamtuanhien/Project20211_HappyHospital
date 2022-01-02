@@ -33,6 +33,7 @@ export class MainScene extends Scene {
   private doorPos!: Position[];
   private timeText?: Phaser.GameObjects.Text;
   private sec: number = 0 ;
+  private timeTable?: Phaser.GameObjects.Text;
 
   private agents!: Agent[];
   private MAX_AGENT: number = 20;
@@ -267,6 +268,15 @@ export class MainScene extends Scene {
       fontSize: "28px",
       fontStyle: "bold"
     });
+
+    this.timeTable = this.add.text(window.innerWidth - 1910, 870, "", {
+      color: "#D8202A",
+      fontSize: "28px",
+      fontStyle: "bold"
+    }
+    );
+    this.agv.writeDeadline(this.timeTable);
+    this.autoAgv?.writeDeadline(this.timeTable);
   }
 
   openLinkInstruction() {

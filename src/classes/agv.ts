@@ -51,6 +51,8 @@ export class Agv extends Actor {
     // PHYSICS
     this.getBody().setSize(32, 32);
     this.setOrigin(0, 0);
+
+    this.estimateArrivalTime(x, y, desX, desY);
   }
 
   private getTilesWithin(): Tilemaps.Tile[] {
