@@ -114,7 +114,7 @@ export class AutoAgv extends Actor {
   }
 
   private heuristic(node1: Nodee, node2: Nodee): number {
-    return Math.abs(node1.x - node2.x) + Math.abs(node1.y - node2.y);
+    return 0;
   }
 
   public calPathAStar(start: Nodee, end: Nodee): Nodee[] | null {
