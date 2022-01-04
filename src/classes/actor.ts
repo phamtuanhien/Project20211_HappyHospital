@@ -40,17 +40,13 @@ export class Actor extends Physics.Arcade.Sprite {
     this.expectedTime = Math.floor(Math.sqrt((endX - startX)**2 + (endY - startY)**2)*0.085);
   }
 
-  public writeDeadline(table: Phaser.GameObjects.Text) : void{
+  public writeDeadline(table: Phaser.GameObjects.Text) : void {
     if(this.agvID != -1){
-      var earliest= this.expectedTime - 4;
-      if(earliest< 0) earliest = 0;
-      var latest = this.expectedTime + 4;
       var space = "";
       if(table.text.length > 0)
         space = "; "
       table.text = table.text + space + "DES_" + this.agvID + ": " +
-          MainScene.secondsToHMS(earliest).slice(3, 8) 
-          + "->" + MainScene.secondsToHMS(latest).slice(3, 8);
+          MainScene.secondsToHMS(this.expectedTime) + " ± 4"
     }
   }
 }
