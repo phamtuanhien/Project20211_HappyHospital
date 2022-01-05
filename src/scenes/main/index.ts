@@ -34,7 +34,8 @@ export class MainScene extends Scene {
   private timeText?: Phaser.GameObjects.Text;
   private sec: number = 0 ;
   private timeTable?: Phaser.GameObjects.Text;
-
+  private harmfulTable?: Phaser.GameObjects.Text;
+  private _harmfullness: number = 0;
   private agents!: Agent[];
   private MAX_AGENT: number = 20;
 
@@ -126,6 +127,15 @@ export class MainScene extends Scene {
     var mDisplay = m >= 10 ? m : ("0" + m);
     var sDisplay = s >= 10 ? s : ("0" + s);
     return hDisplay + ":" + mDisplay + ":" + sDisplay;
+  }
+
+  public get harmfullness(): number {
+    return this._harmfullness;
+  }
+
+  public set harmfullness(value: number) {
+    this._harmfullness = value;
+    this.harmfulTable?.setText("H.ness: " + this._harmfullness);
   }
 
   createAgents(numAgentInit: number, time: number) {
@@ -277,6 +287,12 @@ export class MainScene extends Scene {
     );
     this.agv.writeDeadline(this.timeTable);
     this.autoAgv?.writeDeadline(this.timeTable);
+
+    this.harmfulTable = this.add.text(window.innerWidth - 200, 320, "H.ness: 0", {
+      color: "#D8202A",
+      fontSize: "28px",
+      fontStyle: "bold"
+    });
   }
 
   openLinkInstruction() {
