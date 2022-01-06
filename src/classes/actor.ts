@@ -1,5 +1,4 @@
 import { Physics } from "phaser";
-import { MainScene } from "../scenes/main";
 import { Constant } from "../Constant";
 
 export class Actor extends Physics.Arcade.Sprite {
@@ -51,7 +50,7 @@ export class Actor extends Physics.Arcade.Sprite {
       if(table.text.length > 0)
         space = "; "
       table.text = table.text + space + "DES_" + this.agvID + ": " +
-          MainScene.secondsToHMS(this.expectedTime) + " ± " + Constant.DURATION;
+        Constant.secondsToHMS(this.expectedTime) + " ± " + Constant.DURATION;
     }
   }
 }

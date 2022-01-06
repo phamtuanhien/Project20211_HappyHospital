@@ -1,12 +1,11 @@
-import { GameObjects, Scene, Tilemaps } from "phaser";
+import { Scene, Tilemaps } from "phaser";
 import { Agv } from "../../classes/agv";
 import { Agent } from "../../classes/agent";
 import { Position } from "../../classes/position";
 import { AutoAgv } from "../../classes/AutoAgv";
-import { Nodee } from "../../classes/node";
 import { Graph } from "../../classes/graph";
-import { read } from "fs";
 import { RandomDistribution } from "../../algorithm/random";
+import { Constant } from "../../Constant";
 
 export class MainScene extends Scene {
   private agv!: Agv;
@@ -115,19 +114,8 @@ export class MainScene extends Scene {
 
     setInterval(() => {
       this.sec++;
-      this.timeText?.setText(MainScene.secondsToHMS(this.sec));
+      this.timeText?.setText(Constant.secondsToHMS(this.sec));
     }, 1000 );
-  }
-
-  public static secondsToHMS(seconds : number) : string {
-    var h = Math.floor(seconds % (3600*24) / 3600);
-    var m = Math.floor(seconds % 3600 / 60);
-    var s = Math.floor(seconds % 60);
-    
-    var hDisplay = h >= 10 ? h : ("0" + h);
-    var mDisplay = m >= 10 ? m : ("0" + m);
-    var sDisplay = s >= 10 ? s : ("0" + s);
-    return hDisplay + ":" + mDisplay + ":" + sDisplay;
   }
 
   public get harmfullness(): number {
@@ -136,7 +124,7 @@ export class MainScene extends Scene {
 
   public set harmfullness(value: number) {
     this._harmfullness = value;
-    this.harmfulTable?.setText("H.ness: " + this._harmfullness);
+    this.harmfulTable?.setText("H.ness: " + this._harmfullness.toFixed(2)).setPosition(window.innerWidth - 245, 320);
   }
 
   createAgents(numAgentInit: number, time: number) {
