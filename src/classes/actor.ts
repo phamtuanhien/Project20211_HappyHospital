@@ -1,6 +1,7 @@
 import { Physics } from "phaser";
 import { MainScene } from "../scenes/main";
-import { Constant } from "../constant";
+import { Constant } from "../Constant";
+
 export class Actor extends Physics.Arcade.Sprite {
   private static _id = 0;
   private agvID!: number;
