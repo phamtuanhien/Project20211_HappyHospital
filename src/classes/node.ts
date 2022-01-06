@@ -1,4 +1,4 @@
-export enum State {
+export enum StateOfNodee {
   EMPTY,
   BUSY,
   NOT_ALLOW,
@@ -18,7 +18,7 @@ export class Nodee {
   public w_edge_E: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w: number = 0; // thời gian dự đoán dừng (ms)
   public u: number = 0; // thời gian dừng thực tế (ms)
-  public state: State; // trạng thái nút
+  public state: StateOfNodee; // trạng thái nút
   public p_random: number; // xác xuất nút chuyển sang trạng thái Busy
   public t_min: number; // thời gian tối thiểu nút ở trạng thái busy (ms)
   public t_max: number; // thời gian tối đa nút ở trạng thái busy (ms)
@@ -26,7 +26,7 @@ export class Nodee {
   constructor(
     x: number,
     y: number,
-    state: State = State.NOT_ALLOW,
+    state: StateOfNodee = StateOfNodee.NOT_ALLOW,
     p_random: number = 0.05,
     t_min: number = 2000,
     t_max: number = 3000
@@ -72,7 +72,7 @@ export class Nodee {
     }
   }
 
-  public setState(state: State) {
+  public setState(state: StateOfNodee) {
     this.state = state;
   }
 

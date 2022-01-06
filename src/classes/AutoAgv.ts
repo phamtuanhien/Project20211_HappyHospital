@@ -1,7 +1,10 @@
 import { Actor } from "./actor";
 import { Text } from "./text";
 import { Graph } from "./graph";
-import { Nodee, State } from "./node";
+import { Nodee, StateOfNodee } from "./node";
+import { HybridState } from "./statesOfAutoAGV/HybridState";
+import { RunningState } from "./statesOfAutoAGV/RunningState";
+import { MainScene } from "../scenes";
 const PriorityQueue = require("priorityqueuejs");
 
 export class AutoAgv extends Actor {
@@ -13,6 +16,13 @@ export class AutoAgv extends Actor {
   public waitT: number;
   public sobuocdichuyen: number;
   public thoigiandichuyen: number;
+  public hybridState : HybridState | undefined;
+  public endX: number;
+  public endY: number;
+  public firstText?: Text;
+
+  public startX: number;
+  public startY: number;
 
   constructor(
     scene: Phaser.Scene,
@@ -23,95 +33,33 @@ export class AutoAgv extends Actor {
     graph: Graph
   ) {
     super(scene, x * 32, y * 32, "agv");
+    this.startX = x*32;
+    this.startY = y*32;
+    this.endX = endX*32;
+    this.endY = endY*32;
+
     this.graph = graph;
     this.getBody().setSize(32, 32);
     this.setOrigin(0, 0);
     this.cur = 0;
     this.waitT = 0;
     this.curNode = this.graph.nodes[x][y];
-    this.curNode.setState(State.BUSY);
+    this.curNode.setState(StateOfNodee.BUSY);
     this.endNode = this.graph.nodes[endX][endY];
-    new Text(this.scene, endX * 32, endY * 32, "DES", "16px", "#F00");
+    this.firstText = new Text(this.scene, endX * 32, endY * 32, "DES", "16px", "#F00");
     this.path = this.calPathAStar(this.curNode, this.endNode);
     this.sobuocdichuyen = 0;
     this.thoigiandichuyen = performance.now();
     this.estimateArrivalTime(x*32, y*32, endX*32, endY*32);
+    this.hybridState = new RunningState();
   }
 
   protected preUpdate(time: number, delta: number): void {
-    this.move();
+    //this.move();
     // console.log(this.x, this.y);
+    this.hybridState?.move(this);
   }
 
-  public move() {
-    // nếu không có đường đi đến đích thì không làm gì
-    if (!this.path) {
-      return;
-    }
-
-    // nếu đã đến đích thì không làm gì
-    if (this.cur == this.path.length - 1) {
-      this.setVelocity(0, 0);
-      return;
-    }
-
-    // nodeNext: nút tiếp theo cần đến
-    let nodeNext: Nodee =
-      this.graph.nodes[this.path[this.cur + 1].x][this.path[this.cur + 1].y];
-    /**
-     * nếu nút tiếp theo đang ở trạng thái bận
-     * thì Agv chuyển sang trạng thái chờ
-     */
-    if (nodeNext.state == State.BUSY) {
-      this.setVelocity(0, 0);
-      if (this.waitT) return;
-      this.waitT = performance.now();
-    } else {
-      /**
-       * nếu Agv từ trạng thái chờ -> di chuyển
-       * thì cập nhật u cho node hiện tại
-       */
-      if (this.waitT) {
-        // console.log(performance.now() - this.waitT);
-        this.curNode.setU((performance.now() - this.waitT) / 1000);
-        // console.log(this.curNode);
-        // console.log(this.graph);
-        this.waitT = 0;
-      }
-      // di chuyển đến nút tiếp theo
-      if (
-        Math.abs(this.x - nodeNext.x * 32) > 1 ||
-        Math.abs(this.y - nodeNext.y * 32) > 1
-      ) {
-        this.scene.physics.moveTo(this, nodeNext.x * 32, nodeNext.y * 32, 32);
-      } else {
-        /**
-         * Khi đã đến nút tiếp theo thì cập nhật trạng thái
-         * cho nút trước đó, nút hiện tại và Agv
-         */
-        this.curNode.setState(State.EMPTY);
-        this.curNode = nodeNext;
-        this.curNode.setState(State.BUSY);
-        this.cur++;
-        this.setX(this.curNode.x * 32);
-        this.setY(this.curNode.y * 32);
-        this.setVelocity(0, 0);
-        this.sobuocdichuyen++;
-        // console.log(this.sobuocdichuyen);
-
-        // cap nhat lai duong di Agv moi 10 buoc di chuyen;
-        // hoac sau 10s di chuyen
-        if (
-          this.sobuocdichuyen % 10 == 0 ||
-          performance.now() - this.thoigiandichuyen > 10000
-        ) {
-          this.thoigiandichuyen = performance.now();
-          this.cur = 0;
-          this.path = this.calPathAStar(this.curNode, this.endNode);
-        }
-      }
-    }
-  }
 
   private heuristic(node1: Nodee, node2: Nodee): number {
     return Math.abs(node1.x - node2.x) + Math.abs(node1.y - node2.y);
@@ -216,5 +164,33 @@ export class AutoAgv extends Actor {
       if (node.equal(nodes[i])) return true;
     }
     return false;
+  }
+
+  public changeTarget() : void {
+    var mainScene = this.scene as MainScene;
+    let agvsToGate1 : Array<number> = mainScene.mapOfExits.get("Gate1") as Array<number>;
+    let agvsToGate2 : Array<number> = mainScene.mapOfExits.get("Gate2") as Array<number>;
+    var choosenGate = agvsToGate1[2] > agvsToGate2[2] ? "Gate1" : "Gate2";
+    var newArray = mainScene.mapOfExits.get(choosenGate) as Array<number>;
+    newArray[2]++;
+    mainScene.mapOfExits.set(choosenGate, newArray);
+
+    this.startX = this.endX;
+    this.startY = this.endY;
+
+    var xEnd : number = newArray[0];
+    var yEnd : number = newArray[1];
+
+    this.endX = xEnd*32;
+    this.endY = yEnd*32;
+
+    var finalAGVs = (mainScene.mapOfExits.get(choosenGate) as Array<number>)[2];
+
+    this.endNode = this.graph.nodes[xEnd][yEnd];
+    this.firstText = new Text(this.scene, xEnd * 32, yEnd * 32, "DES_" + finalAGVs, "16px", "#F00");
+    this.path = this.calPathAStar(this.curNode, this.endNode);
+    this.sobuocdichuyen = 0;
+    this.thoigiandichuyen = performance.now();
+    this.estimateArrivalTime(32*this.startX, 32*this.startY, this.endX*32, this.endY*32);
   }
 }

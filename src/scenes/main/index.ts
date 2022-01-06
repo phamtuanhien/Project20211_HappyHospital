@@ -38,6 +38,7 @@ export class MainScene extends Scene {
   private _harmfullness: number = 0;
   private agents!: Agent[];
   private MAX_AGENT: number = 20;
+  public mapOfExits = new Map([["Gate1", [50, 13, 0]], ["Gate2", [50, 14, 0]]]);
 
   constructor() {
     super("main-scene");
