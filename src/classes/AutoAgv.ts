@@ -170,7 +170,7 @@ export class AutoAgv extends Actor {
     var mainScene = this.scene as MainScene;
     let agvsToGate1 : Array<number> = mainScene.mapOfExits.get("Gate1") as Array<number>;
     let agvsToGate2 : Array<number> = mainScene.mapOfExits.get("Gate2") as Array<number>;
-    var choosenGate = agvsToGate1[2] > agvsToGate2[2] ? "Gate1" : "Gate2";
+    var choosenGate = agvsToGate1[2] < agvsToGate2[2] ? "Gate1" : "Gate2";
     var newArray = mainScene.mapOfExits.get(choosenGate) as Array<number>;
     newArray[2]++;
     mainScene.mapOfExits.set(choosenGate, newArray);
