@@ -57,21 +57,6 @@ export class MainScene extends Scene {
   }
 
   preload(): void {
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
-    this.load.plugin(
-      "rextexteditplugin",
-      "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js",
-      true
-    );
-    this.load.plugin(
-      "rexinputtextplugin",
-      "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexinputtextplugin.min.js",
-      true
-    );
     this.load.baseURL = "assets/";
     this.load.image({
       key: "tiles",
@@ -139,6 +124,7 @@ export class MainScene extends Scene {
 
   public setMaxAgents(num: number): void {
     this.MAX_AGENT = num;
+    alert("Thiết lập số Agents thành công!");
   }
 
   public get harmfullness(): number {
