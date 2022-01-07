@@ -26,18 +26,20 @@ export class MainScene extends Scene {
   private danhsachke: Position[][][];
   private saveButton?: Phaser.GameObjects.Text;
   private loadButton?: Phaser.GameObjects.Text;
-  private applyButton?: Phaser.GameObjects.Text;
   private mapData: any = {};
   private graph?: Graph;
   private doorPos!: Position[];
   private timeText?: Phaser.GameObjects.Text;
-  private sec: number = 0 ;
+  private sec: number = 0;
   private timeTable?: Phaser.GameObjects.Text;
   private harmfulTable?: Phaser.GameObjects.Text;
   private _harmfullness: number = 0;
   private agents!: Agent[];
-  private MAX_AGENT: number = 20;
-  public mapOfExits = new Map([["Gate1", [50, 13, 0]], ["Gate2", [50, 14, 0]]]);
+  private MAX_AGENT: number = 10;
+  public mapOfExits = new Map([
+    ["Gate1", [50, 13, 0]],
+    ["Gate2", [50, 14, 0]],
+  ]);
 
   constructor() {
     super("main-scene");
@@ -82,6 +84,7 @@ export class MainScene extends Scene {
       frameHeight: 32,
     });
     this.load.image("instruction", "sprites/instruction.png");
+    this.load.html("setNumAgentForm", "setNumAgents.html");
   }
 
   create(): void {
@@ -115,7 +118,27 @@ export class MainScene extends Scene {
     setInterval(() => {
       this.sec++;
       this.timeText?.setText(Constant.secondsToHMS(this.sec));
-    }, 1000 );
+    }, 1000);
+
+    var setNumAgentsDOM = this.add
+      .dom(1790, 220)
+      .createFromCache("setNumAgentForm");
+    setNumAgentsDOM.setPerspective(800);
+    // setNumAgentsDOM.setPosition()
+    setNumAgentsDOM.addListener("click");
+    setNumAgentsDOM.on("click", function (this: any, event: any) {
+      if (event.target.id === "submit") {
+        let input = this.getChildByName("numOfAgents");
+        let numAgent = parseInt(input.value);
+        if (!isNaN(numAgent) && numAgent > 0) {
+          this.scene.setMaxAgents(numAgent);
+        }
+      }
+    });
+  }
+
+  public setMaxAgents(num: number): void {
+    this.MAX_AGENT = num;
   }
 
   public get harmfullness(): number {
@@ -124,7 +147,9 @@ export class MainScene extends Scene {
 
   public set harmfullness(value: number) {
     this._harmfullness = value;
-    this.harmfulTable?.setText("H.ness: " + this._harmfullness.toFixed(2)).setPosition(window.innerWidth - 245, 320);
+    this.harmfulTable
+      ?.setText("H.ness: " + this._harmfullness.toFixed(2))
+      .setPosition(window.innerWidth - 245, 320);
   }
 
   createAgents(numAgentInit: number, time: number) {
@@ -157,7 +182,6 @@ export class MainScene extends Scene {
     // thêm ngẫu nhiên agent vào môi trường
     setInterval(() => {
       if (this.agents.length >= this.MAX_AGENT) return;
-
       var rand = new RandomDistribution();
       var ran = rand.getProbability();
       if (ran > 1) console.log(rand.getName() + " " + ran);
@@ -207,81 +231,38 @@ export class MainScene extends Scene {
       fontSize: "24px",
       fontStyle: "bold",
     });
-    this.applyButton = this.add.text(window.innerWidth - 155, 240, "Apply", {
-      backgroundColor: "#eee",
-      padding: { bottom: 5, top: 5, left: 10, right: 10 },
-      color: "#000",
-      fontSize: "18px",
-      fontStyle: "bold",
-    });
+
     this.saveButton
       .setInteractive()
       .on("pointerdown", () => this.handleClickSaveButton());
     this.loadButton
       .setInteractive()
       .on("pointerdown", () => this.handleClickLoadButton());
-    this.applyButton
-      .setInteractive()
-      .on("pointerdown", () => this.handleClickApplyButton());
-
-    this.add.text(window.innerWidth - 230, 200, "Number of agents:", {
-      color: "#eee",
-      fontSize: "18px",
-      fontStyle: "bold",
-    });
-
-    const numAgentInput = this.add.text(window.innerWidth - 40, 200, "", {
-      color: "#ff0",
-      fontSize: "18px",
-      fontStyle: "bold",
-    });
-
-    numAgentInput.setInteractive().on("pointerdown", () => {
-      const inputText = this.rexUI
-        .edit(
-          numAgentInput
-          // , {
-          //     id: "numAgentEdit",
-          //     type: "number"
-          // }
-        )
-        .on("textchange", (inputText: any) => {
-          numAgentInput.text = inputText.text;
-        });
-    });
-    // const inputText = this.add.rexInputText(this, window.innerWidth - 40, 200, 10, 10, {
-    //   id: 'numAgents',
-    //   type: 'number',
-    //   fontSize: '18px',
-    //   })
-    //   .resize(100, 100)
-    //   .setOrigin(0.5)
-    //   .on('textchange', (inputText: any) => {
-    //     numAgentInput.text = inputText.text;
-    //   });
-
-    numAgentInput.setText("" + this.agents.length);
 
     this.timeText = this.add.text(window.innerWidth - 190, 290, "00:00:00", {
       color: "#D8202A",
       fontSize: "28px",
-      fontStyle: "bold"
+      fontStyle: "bold",
     });
 
     this.timeTable = this.add.text(window.innerWidth - 1910, 870, "", {
       color: "#D8202A",
       fontSize: "28px",
-      fontStyle: "bold"
-    }
-    );
+      fontStyle: "bold",
+    });
     this.agv.writeDeadline(this.timeTable);
     this.autoAgv?.writeDeadline(this.timeTable);
 
-    this.harmfulTable = this.add.text(window.innerWidth - 200, 320, "H.ness: 0", {
-      color: "#D8202A",
-      fontSize: "28px",
-      fontStyle: "bold"
-    });
+    this.harmfulTable = this.add.text(
+      window.innerWidth - 200,
+      320,
+      "H.ness: 0",
+      {
+        color: "#D8202A",
+        fontSize: "28px",
+        fontStyle: "bold",
+      }
+    );
   }
 
   openLinkInstruction() {
@@ -384,10 +365,6 @@ export class MainScene extends Scene {
     document.body.appendChild(e);
     e.click();
     document.body.removeChild(e);
-  }
-  private handleClickApplyButton() {
-    // this.initAgents(30, 1000000);
-    alert("Đã thiết lập thành công");
   }
 
   private initMap(): void {
