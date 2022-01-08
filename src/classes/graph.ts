@@ -1,9 +1,9 @@
 import { Position } from "./position";
-import { Nodee, StateOfNodee } from "./node";
+import { Node2D, StateOfNode2D } from "./node";
 import { Agent } from "./agent";
 
 export class Graph {
-  public nodes: Nodee[][];
+  public nodes: Node2D[][];
   public width: number;
   public height: number;
   public agents: Agent[] = [];
@@ -23,7 +23,7 @@ export class Graph {
     for (let i = 0; i < width; i++) {
       this.nodes[i] = [];
       for (let j = 0; j < height; j++) {
-        this.nodes[i][j] = new Nodee(i, j);
+        this.nodes[i][j] = new Node2D(i, j);
       }
     }
     for (let i = 0; i < width; i++) {
@@ -35,7 +35,7 @@ export class Graph {
       }
     }
     for (let p of pathPos) {
-      this.nodes[p.x][p.y].setState(StateOfNodee.EMPTY);
+      this.nodes[p.x][p.y].setState(StateOfNode2D.EMPTY);
     }
     // console.log(this.nodes);
 
@@ -43,7 +43,7 @@ export class Graph {
     for (let i = 0; i < 52; i++) {
       this.busy[i] = new Array(28);
       for (let j = 0; j < 28; j++) {
-        if (this.nodes[i][j].state === StateOfNodee.EMPTY) {
+        if (this.nodes[i][j].state === StateOfNode2D.EMPTY) {
           this.busy[i][j] = 0;
         } else {
           this.busy[i][j] = 2;
@@ -54,13 +54,13 @@ export class Graph {
 
   public setAgents(agents: Agent[]): void {
     for (let p of this.pathPos) {
-      this.nodes[p.x][p.y].setState(StateOfNodee.EMPTY);
+      this.nodes[p.x][p.y].setState(StateOfNode2D.EMPTY);
     }
     this.busy = new Array(52);
     for (let i = 0; i < 52; i++) {
       this.busy[i] = new Array(28);
       for (let j = 0; j < 28; j++) {
-        if (this.nodes[i][j].state == StateOfNodee.EMPTY) {
+        if (this.nodes[i][j].state == StateOfNode2D.EMPTY) {
           this.busy[i][j] = 0;
         } else {
           this.busy[i][j] = 2;
@@ -95,11 +95,11 @@ export class Graph {
           continue;
         } else if (this.busy[i][j] === 0) {
           if ((cur[i][j] = 0)) continue;
-          this.nodes[i][j].setState(StateOfNodee.BUSY);
+          this.nodes[i][j].setState(StateOfNode2D.BUSY);
           this.busy[i][j] = 1;
         } else {
           if (cur[i][j] === 1) continue;
-          this.nodes[i][j].setState(StateOfNodee.EMPTY);
+          this.nodes[i][j].setState(StateOfNode2D.EMPTY);
           this.busy[i][j] = 0;
         }
       }
@@ -109,7 +109,7 @@ export class Graph {
   public removeAgent(agent: Agent): void {
     let i = agent.x / 32;
     let j = agent.y / 32;
-    this.nodes[i][j].setState(StateOfNodee.EMPTY);
+    this.nodes[i][j].setState(StateOfNode2D.EMPTY);
     this.busy[i][j] = 0;
   }
 }

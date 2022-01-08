@@ -1,7 +1,7 @@
 import { Actor } from "../actor";
 import { Text } from "../text";
 import { Graph } from "../graph";
-import { Nodee, StateOfNodee } from "../node";
+import { Node2D, StateOfNode2D } from "../node";
 import { HybridState } from "./HybridState";
 import { AutoAgv } from "../AutoAgv";
 import { Constant } from "../../Constant";

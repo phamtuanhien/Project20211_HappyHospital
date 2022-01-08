@@ -1,7 +1,7 @@
 import { Actor } from "./actor";
 import { Text } from "./text";
 import { Graph } from "./graph";
-import { Nodee, StateOfNodee } from "./node";
+import { Node2D, StateOfNode2D } from "./node";
 import { HybridState } from "./statesOfAutoAGV/HybridState";
 import { RunningState } from "./statesOfAutoAGV/RunningState";
 import { MainScene } from "../scenes";
@@ -9,9 +9,9 @@ const PriorityQueue = require("priorityqueuejs");
 
 export class AutoAgv extends Actor {
   public graph: Graph;
-  public path: Nodee[] | null;
-  public curNode: Nodee;
-  public endNode: Nodee;
+  public path: Node2D[] | null;
+  public curNode: Node2D;
+  public endNode: Node2D;
   public cur: number;
   public waitT: number;
   public sobuocdichuyen: number;
@@ -44,7 +44,7 @@ export class AutoAgv extends Actor {
     this.cur = 0;
     this.waitT = 0;
     this.curNode = this.graph.nodes[x][y];
-    this.curNode.setState(StateOfNodee.BUSY);
+    this.curNode.setState(StateOfNode2D.BUSY);
     this.endNode = this.graph.nodes[endX][endY];
     this.firstText = new Text(this.scene, endX * 32, endY * 32, "DES", "16px", "#F00");
     this.path = this.calPathAStar(this.curNode, this.endNode);
@@ -61,21 +61,21 @@ export class AutoAgv extends Actor {
   }
 
 
-  private heuristic(node1: Nodee, node2: Nodee): number {
+  private heuristic(node1: Node2D, node2: Node2D): number {
     return Math.abs(node1.x - node2.x) + Math.abs(node1.y - node2.y);
   }
 
-  public calPathAStar(start: Nodee, end: Nodee): Nodee[] | null {
+  public calPathAStar(start: Node2D, end: Node2D): Node2D[] | null {
     /**
      * Khoi tao cac bien trong A*
      */
-    let openSet: Nodee[] = [];
-    let closeSet: Nodee[] = [];
-    let path: Nodee[] = [];
+    let openSet: Node2D[] = [];
+    let closeSet: Node2D[] = [];
+    let path: Node2D[] = [];
     let astar_f: number[][] = new Array(this.graph.width);
     let astar_g: number[][] = new Array(this.graph.width);
     let astar_h: number[][] = new Array(this.graph.width);
-    let previous: Nodee[][] = new Array(this.graph.width);
+    let previous: Node2D[][] = new Array(this.graph.width);
     for (let i = 0; i < this.graph.width; i++) {
       astar_f[i] = new Array(this.graph.height);
       astar_g[i] = new Array(this.graph.height);
@@ -105,7 +105,7 @@ export class AutoAgv extends Actor {
       let current = openSet[winner];
 
       if (openSet[winner].equal(end)) {
-        let cur: Nodee = this.graph.nodes[end.x][end.y];
+        let cur: Node2D = this.graph.nodes[end.x][end.y];
         path.push(cur);
         while (previous[cur.x][cur.y] != undefined) {
           path.push(previous[cur.x][cur.y]);
@@ -159,7 +159,7 @@ export class AutoAgv extends Actor {
     return null;
   }
 
-  private isInclude(node: Nodee, nodes: Nodee[]): boolean {
+  private isInclude(node: Node2D, nodes: Node2D[]): boolean {
     for (let i = 0; i < nodes.length; i++) {
       if (node.equal(nodes[i])) return true;
     }

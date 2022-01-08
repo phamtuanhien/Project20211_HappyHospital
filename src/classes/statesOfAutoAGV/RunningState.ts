@@ -1,7 +1,7 @@
 import { Actor } from "../actor";
 import { Text } from "../text";
 import { Graph } from "../graph";
-import { Nodee, StateOfNodee } from "../node";
+import { Node2D, StateOfNode2D } from "../node";
 import { HybridState } from "./HybridState";
 import { AutoAgv } from "../AutoAgv";
 import { IdleState } from "./IdleState";
@@ -41,13 +41,13 @@ export class RunningState extends HybridState {
             return;
         }
         // nodeNext: nút tiếp theo cần đến
-        let nodeNext: Nodee =
+        let nodeNext: Node2D =
         agv.graph.nodes[agv.path[agv.cur + 1].x][agv.path[agv.cur + 1].y];
         /**
          * nếu nút tiếp theo đang ở trạng thái bận
         * thì Agv chuyển sang trạng thái chờ
         */
-        if (nodeNext.state == StateOfNodee.BUSY) {
+        if (nodeNext.state == StateOfNode2D.BUSY) {
             agv.setVelocity(0, 0);
             if (agv.waitT) return;
             agv.waitT = performance.now();
@@ -71,9 +71,9 @@ export class RunningState extends HybridState {
                  * Khi đã đến nút tiếp theo thì cập nhật trạng thái
                 * cho nút trước đó, nút hiện tại và Agv
                 */
-                agv.curNode.setState(StateOfNodee.EMPTY);
+                agv.curNode.setState(StateOfNode2D.EMPTY);
                 agv.curNode = nodeNext;
-                agv.curNode.setState(StateOfNodee.BUSY);
+                agv.curNode.setState(StateOfNode2D.BUSY);
                 agv.cur++;
                 agv.setX(agv.curNode.x * 32);
                 agv.setY(agv.curNode.y * 32);

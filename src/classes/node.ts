@@ -1,24 +1,24 @@
-export enum StateOfNodee {
+export enum StateOfNode2D {
   EMPTY,
   BUSY,
   NOT_ALLOW,
 }
 
 const lambda = 0.4;
-export class Nodee {
+export class Node2D  {
   public x: number; // 0 <= x <= 52
   public y: number; // 0 <= y <= 28
-  public nodeW: Nodee | null = null;
-  public nodeN: Nodee | null = null;
-  public nodeS: Nodee | null = null;
-  public nodeE: Nodee | null = null;
+  public nodeW: Node2D  | null = null;
+  public nodeN: Node2D  | null = null;
+  public nodeS: Node2D  | null = null;
+  public nodeE: Node2D  | null = null;
   public w_edge_W: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w_edge_N: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w_edge_S: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w_edge_E: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w: number = 0; // thời gian dự đoán dừng (ms)
   public u: number = 0; // thời gian dừng thực tế (ms)
-  public state: StateOfNodee; // trạng thái nút
+  public state: StateOfNode2D; // trạng thái nút
   public p_random: number; // xác xuất nút chuyển sang trạng thái Busy
   public t_min: number; // thời gian tối thiểu nút ở trạng thái busy (ms)
   public t_max: number; // thời gian tối đa nút ở trạng thái busy (ms)
@@ -26,7 +26,7 @@ export class Nodee {
   constructor(
     x: number,
     y: number,
-    state: StateOfNodee = StateOfNodee.NOT_ALLOW,
+    state: StateOfNode2D = StateOfNode2D.NOT_ALLOW,
     p_random: number = 0.05,
     t_min: number = 2000,
     t_max: number = 3000
@@ -56,7 +56,7 @@ export class Nodee {
     // }, 1000);
   }
 
-  public setNeighbor(node: Nodee) {
+  public setNeighbor(node: Node2D) {
     if (this.x + 1 == node.x && this.y == node.y) {
       this.nodeE = node;
       this.w_edge_E = 1;
@@ -72,11 +72,11 @@ export class Nodee {
     }
   }
 
-  public setState(state: StateOfNodee) {
+  public setState(state: StateOfNode2D) {
     this.state = state;
   }
 
-  public equal(node: Nodee) {
+  public equal(node: Node2D) {
     return this.x == node.x && this.y == node.y;
   }
 
