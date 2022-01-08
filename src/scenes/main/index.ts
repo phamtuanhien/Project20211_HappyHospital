@@ -78,6 +78,9 @@ export class MainScene extends Scene {
     this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
 
     let r = Math.floor(Math.random() * this.pathPos.length);
+    while(!Constant.validDestination(this.pathPos[r].x, this.pathPos[r].y, 1, 14)){
+      r = Math.floor(Math.random() * this.pathPos.length);
+    }
     this.agv = new Agv(
       this,
       1 * 32,
