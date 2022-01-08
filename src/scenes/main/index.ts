@@ -415,15 +415,16 @@ export class MainScene extends Scene {
 
   private createRandomAutoAgv() {
     let r = Math.floor(Math.random() * this.pathPos.length);
+    while(!Constant.validDestination(this.pathPos[r].x, this.pathPos[r].y, 1, 13)){
+      r = Math.floor(Math.random() * this.pathPos.length);
+    }
     if (this.graph) {
       this.autoAgv = new AutoAgv(
         this,
         1,
         13,
-        46,
-        2,
-        // this.pathPos[r].x,
-        // this.pathPos[r].y,
+        this.pathPos[r].x,
+        this.pathPos[r].y,
         this.graph
       );
     }
