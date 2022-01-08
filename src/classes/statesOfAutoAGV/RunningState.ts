@@ -5,6 +5,7 @@ import { Nodee, StateOfNodee } from "../node";
 import { HybridState } from "./HybridState";
 import { AutoAgv } from "../AutoAgv";
 import { IdleState } from "./IdleState";
+import { MainScene } from "../../scenes/main";
 const PriorityQueue = require("priorityqueuejs");
 
 export class RunningState extends HybridState {
@@ -28,6 +29,8 @@ export class RunningState extends HybridState {
         if (agv.cur == agv.path.length - 1) {
             agv.setVelocity(0, 0);
             if(this._isLastMoving){
+                var mainScene = agv.scene as MainScene;
+                mainScene.autoAgvs.delete(agv);
                 this._agvIsDestroyed = true;
                 agv.destroy();
                 return;

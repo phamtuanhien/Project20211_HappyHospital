@@ -9,7 +9,7 @@ import { Constant } from "../../Constant";
 
 export class MainScene extends Scene {
   private agv!: Agv;
-  private autoAgv: AutoAgv | null = null;
+  public autoAgvs!: Set<AutoAgv>;
   private map!: Tilemaps.Tilemap;
   private tileset!: Tilemaps.Tileset;
   private groundLayer!: Tilemaps.TilemapLayer;
@@ -40,6 +40,7 @@ export class MainScene extends Scene {
     ["Gate1", [50, 13, 0]],
     ["Gate2", [50, 14, 0]],
   ]);
+  public count : number = 0;
 
   constructor() {
     super("main-scene");
@@ -48,6 +49,7 @@ export class MainScene extends Scene {
     this.pathPos = new Array();
     this.danhsachke = new Array(52);
     this.doorPos = new Array();
+    this.autoAgvs = new Set();
     for (let i = 0; i < this.danhsachke.length; i++) {
       this.danhsachke[i] = new Array(28);
       for (let j = 0; j < this.danhsachke[i].length; j++) {
@@ -90,19 +92,13 @@ export class MainScene extends Scene {
       this.pathLayer
     );
     this.agv.setPushable(false);
-
-    this.createRandomAutoAgv();
-
-    this.events.on("destroyAgent", this.destroyAgentHandler, this);
-
-    this.createAgents(10, 1000);
-
-    this.physics.add.collider(this.agv, this.noPathLayer);
-
     this.addButton();
-
+    this.createRandomAutoAgv();
+    this.events.on("destroyAgent", this.destroyAgentHandler, this);
+    this.createAgents(10, 1000);
+    this.timeTable && this.agv.writeDeadline(this.timeTable);
+    this.physics.add.collider(this.agv, this.noPathLayer);
     this.openLinkInstruction();
-
     setInterval(() => {
       this.sec++;
       this.timeText?.setText(Constant.secondsToHMS(this.sec));
@@ -163,7 +159,11 @@ export class MainScene extends Scene {
         agent.handleOverlap();
         this.agv.handleOverlap();
       });
-      this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
+      this.autoAgvs.forEach(
+        (item) => {
+          item && this.physics.add.overlap(agent, item, () => {});
+        }
+      );
       this.agents.push(agent);
     }
     this.graph?.setAgents(this.agents);
@@ -190,9 +190,18 @@ export class MainScene extends Scene {
         agent.handleOverlap();
         this.agv.handleOverlap();
       });
-      this.autoAgv && this.physics.add.overlap(agent, this.autoAgv, () => {});
+      this.autoAgvs.forEach(
+        (item) => {
+          item && this.physics.add.overlap(agent, item, () => {});
+        }
+      );
       this.agents.push(agent);
       this.graph?.setAgents(this.agents);
+      this.count++;
+      if(this.count == 10){
+        this.createRandomAutoAgv();
+        this.count = 0;
+      }
     }, time);
   }
 
@@ -239,8 +248,6 @@ export class MainScene extends Scene {
       fontSize: "28px",
       fontStyle: "bold",
     });
-    this.agv.writeDeadline(this.timeTable);
-    this.autoAgv?.writeDeadline(this.timeTable);
 
     this.harmfulTable = this.add.text(
       window.innerWidth - 200,
@@ -422,14 +429,9 @@ export class MainScene extends Scene {
       r = Math.floor(Math.random() * this.pathPos.length);
     }
     if (this.graph) {
-      this.autoAgv = new AutoAgv(
-        this,
-        1,
-        13,
-        this.pathPos[r].x,
-        this.pathPos[r].y,
-        this.graph
-      );
+      var tempAgv = new AutoAgv(this, 1, 13, this.pathPos[r].x, this.pathPos[r].y, this.graph);
+      this.timeTable && tempAgv.writeDeadline(this.timeTable);
+      this.autoAgvs.add(tempAgv);
     }
   }
 
