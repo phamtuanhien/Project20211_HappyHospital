@@ -5,6 +5,7 @@ export class Actor extends Physics.Arcade.Sprite {
   private static _id = 0;
   private agvID!: number;
   private expectedTime!: number;
+  public collidedActors!: Set<Actor>;
 
   constructor(
     scene: Phaser.Scene,
@@ -19,13 +20,14 @@ export class Actor extends Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     this.getBody().setCollideWorldBounds(true);
-
+    
     if(texture == "agv") {
       Actor._id++;
       this.agvID = Actor._id;
     } else {
       this.agvID = -1;//Ám chỉ đây là agent
     }
+    this.collidedActors = new Set();
   }
 
   protected getBody(): Physics.Arcade.Body {
@@ -51,6 +53,17 @@ export class Actor extends Physics.Arcade.Sprite {
         space = "; "
       table.text = table.text + space + "DES_" + this.agvID + ": " +
         Constant.secondsToHMS(this.expectedTime) + " ± " + Constant.DURATION;
+    }
+  }
+
+  public freeze(actor: Actor){
+    if(this.collidedActors == null)
+    {
+      this.collidedActors = new Set();
+    }
+    if(!this.collidedActors.has(actor)){
+      //Thêm actor 
+      this.collidedActors.add(actor);
     }
   }
 }

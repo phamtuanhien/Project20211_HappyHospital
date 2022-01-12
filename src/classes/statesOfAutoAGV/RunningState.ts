@@ -1,11 +1,9 @@
-import { Actor } from "../actor";
-import { Text } from "../text";
-import { Graph } from "../graph";
 import { Node2D, StateOfNode2D } from "../node";
 import { HybridState } from "./HybridState";
 import { AutoAgv } from "../AutoAgv";
 import { IdleState } from "./IdleState";
 import { MainScene } from "../../scenes/main";
+import { Constant } from "../../Constant";
 const PriorityQueue = require("priorityqueuejs");
 
 export class RunningState extends HybridState {
@@ -41,17 +39,26 @@ export class RunningState extends HybridState {
             return;
         }
         // nodeNext: nút tiếp theo cần đến
-        let nodeNext: Node2D =
-        agv.graph.nodes[agv.path[agv.cur + 1].x][agv.path[agv.cur + 1].y];
+        let nodeNext: Node2D = agv.graph.nodes[agv.path[agv.cur + 1].x][agv.path[agv.cur + 1].y];
+        //Khoảng cách của autoAgv với các actors khác đã va chạm
+        let shortestDistance = Constant.minDistance(agv, agv.collidedActors);
+
         /**
          * nếu nút tiếp theo đang ở trạng thái bận
         * thì Agv chuyển sang trạng thái chờ
         */
-        if (nodeNext.state == StateOfNode2D.BUSY) {
+        if (nodeNext.state == StateOfNode2D.BUSY || shortestDistance < Constant.SAFE_DISTANCE) {
             agv.setVelocity(0, 0);
             if (agv.waitT) return;
             agv.waitT = performance.now();
-            } else {
+        } else {
+            /*
+             * Nếu tất cả các actor đều cách autoAgv một khoảng cách an toàn
+            */
+            if(shortestDistance >= Constant.SAFE_DISTANCE){
+                //Thì gỡ hết các actors trong danh sách đã gây ra va chạm
+                agv.collidedActors.clear();
+            }
             /**
              * nếu Agv từ trạng thái chờ -> di chuyển
                 * thì cập nhật u cho node hiện tại
@@ -61,10 +68,7 @@ export class RunningState extends HybridState {
                 agv.waitT = 0;
             }
             // di chuyển đến nút tiếp theo
-            if (
-                Math.abs(agv.x - nodeNext.x * 32) > 1 ||
-                Math.abs(agv.y - nodeNext.y * 32) > 1
-            ) {
+            if (Math.abs(agv.x - nodeNext.x * 32) > 1 || Math.abs(agv.y - nodeNext.y * 32) > 1) {
                 agv.scene.physics.moveTo(agv, nodeNext.x * 32, nodeNext.y * 32, 32);
             } else {
                 /**
@@ -81,9 +85,7 @@ export class RunningState extends HybridState {
                 agv.sobuocdichuyen++;
                 // cap nhat lai duong di Agv moi 10 buoc di chuyen;
                 // hoac sau 10s di chuyen
-                if (
-                agv.sobuocdichuyen % 10 == 0 ||
-                performance.now() - agv.thoigiandichuyen > 10000
+                if (agv.sobuocdichuyen % 10 == 0 || performance.now() - agv.thoigiandichuyen > 10000
                 ) {
                     agv.thoigiandichuyen = performance.now();
                     agv.cur = 0;

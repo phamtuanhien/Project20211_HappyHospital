@@ -161,7 +161,9 @@ export class MainScene extends Scene {
       });
       this.autoAgvs.forEach(
         (item) => {
-          item && this.physics.add.overlap(agent, item, () => {});
+          item && this.physics.add.overlap(agent, item, () => {
+            item.freeze(agent);
+          });
         }
       );
       this.agents.push(agent);
@@ -192,7 +194,9 @@ export class MainScene extends Scene {
       });
       this.autoAgvs.forEach(
         (item) => {
-          item && this.physics.add.overlap(agent, item, () => {});
+          item && this.physics.add.overlap(agent, item, () => {
+            item.freeze(agent);
+          });
         }
       );
       this.agents.push(agent);
@@ -212,6 +216,14 @@ export class MainScene extends Scene {
     }
     this.agents.splice(index, 1);
     this.graph?.removeAgent(agent);
+    this.autoAgvs.forEach(
+      (elem) => {
+          if(elem.collidedActors.has(agent))
+          {
+            elem.collidedActors.delete(agent);
+          }
+      }
+    );
   }
 
   addButton(): void {

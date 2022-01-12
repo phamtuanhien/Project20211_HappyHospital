@@ -41,7 +41,7 @@ export class IdleState extends HybridState {
         } else {
             agv.firstText?.destroy();
             agv.hybridState = new RunningState(true);
-            console.log((agv.hybridState as RunningState)._isLastMoving);
+            // console.log((agv.hybridState as RunningState)._isLastMoving);
             agv.changeTarget();
         }
     }
