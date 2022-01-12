@@ -16,6 +16,7 @@ export class Agent extends Actor {
   private next: number = 1;
   private id: number;
   public isOverlap: boolean = false;
+  public speed: number = 38;
 
   constructor(
     scene: Phaser.Scene,
@@ -31,6 +32,7 @@ export class Agent extends Actor {
     this.path = [];
     this.vertexs = [];
     this.id = id;
+    this.speed = Math.floor(Math.random() * (this.speed - 10)) + 10;
 
     this.endText = new Text(
       this.scene,
@@ -111,7 +113,7 @@ export class Agent extends Actor {
         this,
         this.vertexs[this.next].x * 32,
         this.vertexs[this.next].y * 32,
-        32
+        this.speed
       );
       this.agentText.setX(this.x);
       this.agentText.setY(this.y - 16);
