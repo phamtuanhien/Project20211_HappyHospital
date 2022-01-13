@@ -94,7 +94,7 @@ export class Graph {
         if (this.busy[i][j] === 2) {
           continue;
         } else if (this.busy[i][j] === 0) {
-          if ((cur[i][j] = 0)) continue;
+          if ((cur[i][j] === 0)) continue;
           this.nodes[i][j].setState(StateOfNode2D.BUSY);
           this.busy[i][j] = 1;
         } else {
