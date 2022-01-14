@@ -6,6 +6,7 @@ import { AutoAgv } from "../../classes/AutoAgv";
 import { Graph } from "../../classes/graph";
 import { RandomDistribution } from "../../algorithm/random";
 import { Constant } from "../../Constant";
+import { EmergencyGraph } from "../../classes/emergencyGraph";
 
 export class MainScene extends Scene {
   private agv!: Agv;
@@ -28,6 +29,7 @@ export class MainScene extends Scene {
   private loadButton?: Phaser.GameObjects.Text;
   private mapData: any = {};
   private graph?: Graph;
+  private emergencyGraph?: EmergencyGraph;
   private doorPos!: Position[];
   private timeText?: Phaser.GameObjects.Text;
   private sec: number = 0;
@@ -78,6 +80,7 @@ export class MainScene extends Scene {
     this.initMap();
     this.taodanhsachke();
     this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
+    this.emergencyGraph = new EmergencyGraph(52, 28, this.danhsachke, this.pathPos);
 
     let r = Math.floor(Math.random() * this.pathPos.length);
     while(!Constant.validDestination(this.pathPos[r].x, this.pathPos[r].y, 1, 14)){
@@ -119,6 +122,12 @@ export class MainScene extends Scene {
         }
       }
     });
+    
+    var numOfRealEdges = Constant.numberOfEdges(52, 28, this.graph.nodes);
+    var numOfAllEdges = Constant.numberOfEdges(52, 28, this.emergencyGraph.nodes)
+                  + Constant.numberOfEdges(52, 28, this.emergencyGraph.virtualNodes);
+    console.log("NumOfAllEdges " + numOfAllEdges + " as well as #RealEdges: " + numOfRealEdges);
+    console.assert(numOfAllEdges == 4 * numOfRealEdges, "NumOfAllEdges " + numOfAllEdges + " != 4 times #RealEdges: " + numOfRealEdges);
   }
 
   public setMaxAgents(num: number): void {
