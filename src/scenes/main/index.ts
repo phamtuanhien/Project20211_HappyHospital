@@ -7,6 +7,7 @@ import { Graph } from "../../classes/graph";
 import { RandomDistribution } from "../../algorithm/random";
 import { Constant } from "../../Constant";
 import { EmergencyGraph } from "../../classes/emergencyGraph";
+import { Forcasting } from "../../classes/statistic/forcasting";
 
 export class MainScene extends Scene {
   private agv!: Agv;
@@ -43,7 +44,8 @@ export class MainScene extends Scene {
     ["Gate2", [50, 14, 0]],
   ]);
   public count : number = 0;
-
+  public forcasting? : Forcasting;
+  
   constructor() {
     super("main-scene");
     this.agents = new Array();
@@ -52,6 +54,7 @@ export class MainScene extends Scene {
     this.danhsachke = new Array(52);
     this.doorPos = new Array();
     this.autoAgvs = new Set();
+    this.forcasting = new Forcasting();
     for (let i = 0; i < this.danhsachke.length; i++) {
       this.danhsachke[i] = new Array(28);
       for (let j = 0; j < this.danhsachke[i].length; j++) {
@@ -296,6 +299,7 @@ export class MainScene extends Scene {
   update(): void {
     this.graph?.updateState();
     this.agv.update();
+    this.forcasting?.calculate();
   }
 
   private handleClickSaveButton() {
