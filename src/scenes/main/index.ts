@@ -36,6 +36,7 @@ export class MainScene extends Scene {
   private _harmfullness: number = 0;
   private agents!: Agent[];
   private MAX_AGENT: number = 10;
+  private desDom?: Phaser.GameObjects.DOMElement;
   public mapOfExits = new Map([
     ["Gate1", [50, 13, 0]],
     ["Gate2", [50, 14, 0]],
@@ -72,12 +73,16 @@ export class MainScene extends Scene {
     });
     this.load.image("instruction", "sprites/instruction.png");
     this.load.html("setNumAgentForm", "setNumAgents.html");
+    this.load.html("des", "des.html");
   }
 
   create(): void {
     this.initMap();
     this.taodanhsachke();
     this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
+
+    this.desDom = this.add.dom(1790, 600).createFromCache("des");
+    this.desDom.setPerspective(800);  
 
     let r = Math.floor(Math.random() * this.pathPos.length);
     while(!Constant.validDestination(this.pathPos[r].x, this.pathPos[r].y, 1, 14)){
@@ -93,10 +98,18 @@ export class MainScene extends Scene {
     );
     this.agv.setPushable(false);
     this.addButton();
+    this.timeTable && this.agv.writeDeadline(this.timeTable);
+    var des = document.getElementById("des");
+      if (des) {
+        while(des.childNodes.length >= 1) {
+          des.firstChild && des.removeChild(des.firstChild);
+        }
+
+        des.appendChild(des.ownerDocument.createTextNode(this.timeTable?.text || ""));
+      }
     this.createRandomAutoAgv();
     this.events.on("destroyAgent", this.destroyAgentHandler, this);
     this.createAgents(10, 1000);
-    this.timeTable && this.agv.writeDeadline(this.timeTable);
     this.physics.add.collider(this.agv, this.noPathLayer);
     this.openLinkInstruction();
     setInterval(() => {
@@ -202,7 +215,7 @@ export class MainScene extends Scene {
       this.agents.push(agent);
       this.graph?.setAgents(this.agents);
       this.count++;
-      if(this.count == 10){
+      if(this.count == 2){
         this.createRandomAutoAgv();
         this.count = 0;
       }
@@ -443,6 +456,14 @@ export class MainScene extends Scene {
     if (this.graph) {
       var tempAgv = new AutoAgv(this, 1, 13, this.pathPos[r].x, this.pathPos[r].y, this.graph);
       this.timeTable && tempAgv.writeDeadline(this.timeTable);
+      var des = document.getElementById("des");
+      if (des) {
+        while(des.childNodes.length >= 1) {
+          des.firstChild && des.removeChild(des.firstChild);
+        }
+
+        des.appendChild(des.ownerDocument.createTextNode(this.timeTable?.text || ""));
+      }
       this.autoAgvs.add(tempAgv);
     }
   }

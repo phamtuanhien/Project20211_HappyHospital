@@ -50,9 +50,9 @@ export class Actor extends Physics.Arcade.Sprite {
     if(this.agvID != -1) {
       var space = "";
       if(table.text.length > 0)
-        space = "; "
-      table.text = table.text + space + "DES_" + this.agvID + ": " +
-        Constant.secondsToHMS(this.expectedTime) + " ± " + Constant.DURATION;
+        space = "\n"
+      table.text ="DES_" + this.agvID + ": " +
+        Constant.secondsToHMS(this.expectedTime) + " ± " + Constant.DURATION + space + table.text;
     }
   }
 
