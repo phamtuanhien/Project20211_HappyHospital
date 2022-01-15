@@ -80,14 +80,16 @@ export class Graph {
     }
     for (let i = 0; i < this.agents.length; i++) {
       let agent = this.agents[i];
-      let xl = Math.floor(agent.x / 32);
-      let xr = Math.floor((agent.x + 31) / 32);
-      let yt = Math.floor(agent.y / 32);
-      let yb = Math.floor((agent.y + 31) / 32);
-      cur[xl][yt] = 1;
-      cur[xl][yb] = 1;
-      cur[xr][yt] = 1;
-      cur[xr][yb] = 1;
+      if(agent.active){
+        let xl = Math.floor(agent.x / 32);
+        let xr = Math.floor((agent.x + 31) / 32);
+        let yt = Math.floor(agent.y / 32);
+        let yb = Math.floor((agent.y + 31) / 32);
+        cur[xl][yt] = 1;
+        cur[xl][yb] = 1;
+        cur[xr][yt] = 1;
+        cur[xr][yb] = 1;
+      }
     }
     for (let i = 0; i < 52; i++) {
       for (let j = 0; j < 28; j++) {

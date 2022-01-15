@@ -4,6 +4,7 @@ import { AutoAgv } from "../AutoAgv";
 import { IdleState } from "./IdleState";
 import { MainScene } from "../../scenes/main";
 import { Constant } from "../../Constant";
+import { WaitingDuration } from "../statistic/waitingPeriod";
 const PriorityQueue = require("priorityqueuejs");
 
 export class RunningState extends HybridState {
@@ -29,16 +30,19 @@ export class RunningState extends HybridState {
             if(this._isLastMoving){
                 var mainScene = agv.scene as MainScene;
                 mainScene.autoAgvs.delete(agv);
+                mainScene.forcasting?.rememberDoneAutoAgv(agv.getAgvID());
                 this._agvIsDestroyed = true;
                 agv.destroy();
                 return;
-            }
-            else{
+            } else {
                 agv.hybridState = new IdleState(performance.now());
             }
             return;
         }
         // nodeNext: nút tiếp theo cần đến
+        if(agv.cur + 1 >= agv.path.length) {
+            console.log("Loi roi do: "+ (agv.cur + 1));
+        }
         let nodeNext: Node2D = agv.graph.nodes[agv.path[agv.cur + 1].x][agv.path[agv.cur + 1].y];
         //Khoảng cách của autoAgv với các actors khác đã va chạm
         let shortestDistance = Constant.minDistance(agv, agv.collidedActors);
@@ -51,11 +55,13 @@ export class RunningState extends HybridState {
             agv.setVelocity(0, 0);
             if (agv.waitT) return;
             agv.waitT = performance.now();
+            (agv.scene as MainScene).forcasting?.
+                addDuration(agv.getAgvID(), new WaitingDuration(Math.floor(agv.waitT/1000)));
         } else {
             /*
              * Nếu tất cả các actor đều cách autoAgv một khoảng cách an toàn
             */
-            if(shortestDistance >= Constant.SAFE_DISTANCE){
+            if(shortestDistance >= Constant.SAFE_DISTANCE) {
                 //Thì gỡ hết các actors trong danh sách đã gây ra va chạm
                 agv.collidedActors.clear();
             }
@@ -65,6 +71,8 @@ export class RunningState extends HybridState {
                 */
             if (agv.waitT) {
                 agv.curNode.setU((performance.now() - agv.waitT) / 1000);
+                (agv.scene as MainScene).forcasting?.
+                            updateDuration(agv.getAgvID(), Math.floor(agv.waitT/1000), Math.floor(performance.now()/1000));
                 agv.waitT = 0;
             }
             // di chuyển đến nút tiếp theo

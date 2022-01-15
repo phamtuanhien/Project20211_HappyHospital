@@ -6,6 +6,8 @@ import { AutoAgv } from "../../classes/AutoAgv";
 import { Graph } from "../../classes/graph";
 import { RandomDistribution } from "../../algorithm/random";
 import { Constant } from "../../Constant";
+import { EmergencyGraph } from "../../classes/emergencyGraph";
+import { Forcasting } from "../../classes/statistic/forcasting";
 
 export class MainScene extends Scene {
   private agv!: Agv;
@@ -28,6 +30,7 @@ export class MainScene extends Scene {
   private loadButton?: Phaser.GameObjects.Text;
   private mapData: any = {};
   private graph?: Graph;
+  private emergencyGraph?: EmergencyGraph;
   private doorPos!: Position[];
   private timeText?: Phaser.GameObjects.Text;
   private sec: number = 0;
@@ -42,7 +45,8 @@ export class MainScene extends Scene {
     ["Gate2", [50, 14, 0]],
   ]);
   public count : number = 0;
-
+  public forcasting? : Forcasting;
+  
   constructor() {
     super("main-scene");
     this.agents = new Array();
@@ -51,6 +55,7 @@ export class MainScene extends Scene {
     this.danhsachke = new Array(52);
     this.doorPos = new Array();
     this.autoAgvs = new Set();
+    this.forcasting = new Forcasting();
     for (let i = 0; i < this.danhsachke.length; i++) {
       this.danhsachke[i] = new Array(28);
       for (let j = 0; j < this.danhsachke[i].length; j++) {
@@ -80,6 +85,7 @@ export class MainScene extends Scene {
     this.initMap();
     this.taodanhsachke();
     this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
+    this.emergencyGraph = new EmergencyGraph(52, 28, this.danhsachke, this.pathPos);
 
     this.desDom = this.add.dom(1790, 600).createFromCache("des");
     this.desDom.setPerspective(800);  
@@ -132,6 +138,12 @@ export class MainScene extends Scene {
         }
       }
     });
+    
+    var numOfRealEdges = Constant.numberOfEdges(52, 28, this.graph.nodes);
+    var numOfAllEdges = Constant.numberOfEdges(52, 28, this.emergencyGraph.nodes)
+                  + Constant.numberOfEdges(52, 28, this.emergencyGraph.virtualNodes);
+    console.log("NumOfAllEdges " + numOfAllEdges + " as well as #RealEdges: " + numOfRealEdges);
+    console.assert(numOfAllEdges == 4 * numOfRealEdges, "NumOfAllEdges " + numOfAllEdges + " != 4 times #RealEdges: " + numOfRealEdges);
   }
 
   public setMaxAgents(num: number): void {
@@ -300,6 +312,7 @@ export class MainScene extends Scene {
   update(): void {
     this.graph?.updateState();
     this.agv.update();
+    this.forcasting?.calculate();
   }
 
   private handleClickSaveButton() {

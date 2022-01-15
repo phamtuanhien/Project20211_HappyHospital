@@ -1,10 +1,12 @@
 import { Actor } from "./classes/actor";
+import { Node2D } from "./classes/node";
 
 export class Constant {
     public static DURATION : number = 4; //thời gian AutoAgv đợi để nhận/dỡ hàng khi đến đích
     public static getLateness = (x: number) => 5*x; //hàm tính chi phí thiệt hại nếu đến quá sớm hoặc quá trễ
     public static SAFE_DISTANCE = 46;
-
+    public static DELTA_T = 10;
+    
     public static secondsToHMS(seconds : number) : string {
         var h = Math.floor(seconds % (3600*24) / 3600);
         var m = Math.floor(seconds % 3600 / 60);
@@ -35,5 +37,22 @@ export class Constant {
             }
         );
         return dist;
+    }
+
+    public static numberOfEdges(width: number, height: number, nodes: Node2D[][]) : number {
+        let count : number = 0;
+        for(let i = 0; i < width; i++) {
+            for(let j = 0; j < height; j++) {
+                count += (nodes[i][j].nodeE != null) ? 1 : 0;
+                count += (nodes[i][j].nodeS != null) ? 1 : 0;
+                count += (nodes[i][j].nodeW != null) ? 1 : 0;
+                count += (nodes[i][j].nodeN != null) ? 1 : 0;
+                count += (nodes[i][j].nodeVE != null) ? 1 : 0;
+                count += (nodes[i][j].nodeVS != null) ? 1 : 0;
+                count += (nodes[i][j].nodeVW != null) ? 1 : 0;
+                count += (nodes[i][j].nodeVN != null) ? 1 : 0;
+            }
+        }
+        return count;
     }
 }
