@@ -285,6 +285,7 @@ export class MainScene extends Scene {
       fontSize: "28px",
       fontStyle: "bold",
     });
+    this.timeTable.setVisible(false);
 
     this.harmfulTable = this.add.text(
       window.innerWidth - 200,

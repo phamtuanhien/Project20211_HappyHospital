@@ -48,11 +48,11 @@ export class Actor extends Physics.Arcade.Sprite {
 
   public writeDeadline(table: Phaser.GameObjects.Text) : void {
     if(this.agvID != -1) {
-      var space = "";
+      var enter = "";
       if(table.text.length > 0)
-        space = "\n"
+      enter = "\n"
       table.text ="DES_" + this.agvID + ": " +
-        Constant.secondsToHMS(this.expectedTime) + " ± " + Constant.DURATION + space + table.text;
+        Constant.secondsToHMS(this.expectedTime) + " ± " + Constant.DURATION + enter + table.text;
     }
   }
 
