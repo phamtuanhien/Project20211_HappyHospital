@@ -56,6 +56,17 @@ export class Actor extends Physics.Arcade.Sprite {
     }
   }
 
+  public eraseDeadline(table: Phaser.GameObjects.Text) : void {
+    if(this.agvID != -1) {
+      var enter = "";
+      if(table.text.length > 0)
+      enter = "\n"
+      let erasedStr : string ="DES_" + this.agvID + ": " +
+        Constant.secondsToHMS(this.expectedTime) + " ± " + Constant.DURATION + enter;
+      table.text = table.text.replace(erasedStr, "");
+    }
+  }
+
   public freeze(actor: Actor){
     if(this.collidedActors == null)
     {

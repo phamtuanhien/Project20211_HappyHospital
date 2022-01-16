@@ -34,7 +34,7 @@ export class MainScene extends Scene {
   private doorPos!: Position[];
   private timeText?: Phaser.GameObjects.Text;
   private sec: number = 0;
-  private timeTable?: Phaser.GameObjects.Text;
+  public timeTable?: Phaser.GameObjects.Text;
   private harmfulTable?: Phaser.GameObjects.Text;
   private _harmfullness: number = 0;
   private agents!: Agent[];

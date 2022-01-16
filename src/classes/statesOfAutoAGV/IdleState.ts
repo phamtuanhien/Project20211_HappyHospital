@@ -40,6 +40,9 @@ export class IdleState extends HybridState {
             return;
         } else {
             agv.firstText?.destroy();
+            var mainScene =  agv.scene as MainScene;
+            if(mainScene != null)
+            agv.eraseDeadline((mainScene.timeTable as Phaser.GameObjects.Text));
             agv.hybridState = new RunningState(true);
             // console.log((agv.hybridState as RunningState)._isLastMoving);
             agv.changeTarget();
