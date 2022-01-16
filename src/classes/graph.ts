@@ -1,6 +1,9 @@
 import { Position } from "./position";
 import { Node2D, StateOfNode2D } from "./node";
 import { Agent } from "./agent";
+import { MainScene } from "../scenes";
+import { AutoAgv } from "./AutoAgv";
+import { Agv } from "./agv";
 
 export class Graph {
   public nodes: Node2D[][];
@@ -9,12 +12,15 @@ export class Graph {
   public agents: Agent[] = [];
   public busy: number[][] = [];
   public pathPos: Position[];
+  private autoAgvs!: Set<AutoAgv>;
+  private agv!: Agv;
 
   constructor(
     width: number,
     height: number,
     danhsachke: Position[][][],
-    pathPos: Position[]
+    pathPos: Position[],
+    //scene: MainScene
   ) {
     this.width = width;
     this.height = height;
@@ -52,6 +58,18 @@ export class Graph {
     }
   }
 
+  public setAutoAgvs(agvs: Set<AutoAgv>) {
+    this.autoAgvs = agvs;
+  }
+
+  public getAutoAgvs(): Set<AutoAgv> {
+    return this.autoAgvs;
+  }
+
+  public setMAgv(agv: Agv) {
+    this.agv = agv;
+  }
+
   public setAgents(agents: Agent[]): void {
     for (let p of this.pathPos) {
       this.nodes[p.x][p.y].setState(StateOfNode2D.EMPTY);
@@ -80,7 +98,7 @@ export class Graph {
     }
     for (let i = 0; i < this.agents.length; i++) {
       let agent = this.agents[i];
-      if(agent.active){
+      if (agent.active) {
         let xl = Math.floor(agent.x / 32);
         let xr = Math.floor((agent.x + 31) / 32);
         let yt = Math.floor(agent.y / 32);
@@ -113,5 +131,105 @@ export class Graph {
     let j = agent.y / 32;
     this.nodes[i][j].setState(StateOfNode2D.EMPTY);
     this.busy[i][j] = 0;
+  }
+
+  public calPathAStar(start: Node2D, end: Node2D): Node2D[]|null {
+    /**
+       * Khoi tao cac bien trong A*
+    */
+    let openSet: Node2D[] = [];
+    let closeSet: Node2D[] = [];
+    let path: Node2D[] = [];
+    let astar_f: number[][] = new Array(this.width);
+    let astar_g: number[][] = new Array(this.width);
+    let astar_h: number[][] = new Array(this.width);
+    let previous: Node2D[][] = new Array(this.width);
+    for (let i = 0; i < this.width; i++) {
+      astar_f[i] = new Array(this.height);
+      astar_g[i] = new Array(this.height);
+      astar_h[i] = new Array(this.height);
+      previous[i] = new Array(this.height);
+      for (let j = 0; j < this.height; j++) {
+        astar_f[i][j] = 0;
+        astar_g[i][j] = 0;
+        astar_h[i][j] = 0;
+      }
+    }
+    let lengthOfPath : number = 1;
+    /**
+     * Thuat toan
+     */
+    openSet.push(this.nodes[start.x][start.y]);
+    while (openSet.length > 0) {
+      let winner = 0;
+      for (let i = 0; i < openSet.length; i++) {
+        if (
+          astar_f[openSet[i].x][openSet[i].y] <
+          astar_f[openSet[winner].x][openSet[winner].y]
+        ) {
+          winner = i;
+        }
+      }
+      let current = openSet[winner];
+      if (openSet[winner].equal(end)) {
+        let cur: Node2D = this.nodes[end.x][end.y];
+        path.push(cur);
+        while (previous[cur.x][cur.y] != undefined) {
+          path.push(previous[cur.x][cur.y]);
+          cur = previous[cur.x][cur.y];
+        }
+        path.reverse();
+        //console.assert(lengthOfPath == path.length, "path has length: " + path.length + " instead of " + lengthOfPath);
+        return path;
+      }
+      openSet.splice(winner, 1);
+      closeSet.push(current);
+      let neighbors = [current.nodeN, current.nodeE, current.nodeS, current.nodeW,
+                       current.nodeVN, current.nodeVE, current.nodeVS, current.nodeVW ];
+      
+      for (let i = 0; i < neighbors.length; i++) {
+        let neighbor = neighbors[i];
+        if (neighbor != null) {
+          if (!this.isInclude(neighbor, closeSet)) {
+            let timexoay = 0;
+            if (
+              previous[current.x][current.y] &&
+              neighbor.x != previous[current.x][current.y].x &&
+              neighbor.y != previous[current.x][current.y].y
+            ) {
+              timexoay = 1;
+            }
+            let tempG =
+              astar_g[current.x][current.y] + 1 + current.getW() + timexoay;
+            if (this.isInclude(neighbor, openSet)) {
+              if (tempG < astar_g[neighbor.x][neighbor.y]) {
+                astar_g[neighbor.x][neighbor.y] = tempG;
+              }
+            } else {
+              astar_g[neighbor.x][neighbor.y] = tempG;
+              openSet.push(neighbor);
+              lengthOfPath++;
+            }
+            astar_h[neighbor.x][neighbor.y] = this.heuristic(neighbor, end);
+            astar_f[neighbor.x][neighbor.y] =
+              astar_h[neighbor.x][neighbor.y] + astar_g[neighbor.x][neighbor.y];
+            previous[neighbor.x][neighbor.y] = current;
+          }//end of if (!this.isInclude(neighbor, closeSet)) {
+        }
+      }
+    }//end of while (openSet.length > 0)
+    console.log("Path not found!");
+    return null;
+  }
+
+  public isInclude(node: Node2D, nodes: Node2D[]): boolean {
+    for (let i = 0; i < nodes.length; i++) {
+      if (node.equal(nodes[i])) return true;
+    }
+    return false;
+  }
+
+  public heuristic(node1: Node2D, node2: Node2D): number {
+    return Math.abs(node1.x - node2.x) + Math.abs(node1.y - node2.y);
   }
 }

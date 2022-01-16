@@ -1,3 +1,5 @@
+import { Constant, ModeOfPathPlanning } from "../Constant";
+
 export enum StateOfNode2D {
   EMPTY,
   BUSY,
@@ -16,8 +18,8 @@ export class Node2D {
   public w_edge_N: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w_edge_S: number = Number.MAX_SAFE_INTEGER; // trong so canh
   public w_edge_E: number = Number.MAX_SAFE_INTEGER; // trong so canh
-  public w: number = 0; // thời gian dự đoán dừng (ms)
-  public u: number = 0; // thời gian dừng thực tế (ms)
+  private w: number = 0; // thời gian dự đoán dừng (ms)
+  private u: number = 0; // thời gian dừng thực tế (ms)
   public state: StateOfNode2D; // trạng thái nút
   public p_random: number; // xác xuất nút chuyển sang trạng thái Busy
   public t_min: number; // thời gian tối thiểu nút ở trạng thái busy (ms)
@@ -34,7 +36,8 @@ export class Node2D {
   public w_edge_VE: number = Number.MAX_SAFE_INTEGER; // trong so canh
 
   public isVirtualNode: boolean = false;
-
+  private _weight: number = 0;
+  
   constructor(
     x: number,
     y: number,
@@ -51,6 +54,20 @@ export class Node2D {
     this.t_min = t_min;
     this.t_max = t_max;
     this.isVirtualNode = isVirtualNode;
+  }
+
+  public getW(): number {
+    if(Constant.MODE == ModeOfPathPlanning.FRANSEN)
+      return this.w;
+    else
+      return this.weight;
+  }
+
+  public get weight(): number {
+    return this._weight;
+  }
+  public set weight(value: number) {
+    this._weight = value;
   }
 
   public setNeighbor(node: Node2D) : void {
@@ -97,12 +114,12 @@ export class Node2D {
   }
 
   public equal(node: Node2D) {
-    if (node.isVirtualNode != this.isVirtualNode)
+    if(node.isVirtualNode != this.isVirtualNode)
       return false;
     return this.x == node.x && this.y == node.y;
   }
 
-  public madeOf(node: Node2D) : boolean {
+  public madeOf(node: Node2D) : boolean{
     return this.equal(node);
   }
 

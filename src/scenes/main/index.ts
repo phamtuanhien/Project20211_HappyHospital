@@ -5,7 +5,7 @@ import { Position } from "../../classes/position";
 import { AutoAgv } from "../../classes/AutoAgv";
 import { Graph } from "../../classes/graph";
 import { RandomDistribution } from "../../algorithm/random";
-import { Constant } from "../../Constant";
+import { Constant, ModeOfPathPlanning } from "../../Constant";
 import { EmergencyGraph } from "../../classes/emergencyGraph";
 import { Forcasting } from "../../classes/statistic/forcasting";
 
@@ -29,7 +29,7 @@ export class MainScene extends Scene {
   private saveButton?: Phaser.GameObjects.Text;
   private loadButton?: Phaser.GameObjects.Text;
   private mapData: any = {};
-  private graph?: Graph;
+  private spaceGraph?: Graph;
   private emergencyGraph?: EmergencyGraph;
   private doorPos!: Position[];
   private timeText?: Phaser.GameObjects.Text;
@@ -84,14 +84,15 @@ export class MainScene extends Scene {
   create(): void {
     this.initMap();
     this.taodanhsachke();
-    this.graph = new Graph(52, 28, this.danhsachke, this.pathPos);
+    this.initGraph();
+    this.spaceGraph = new Graph(52, 28, this.danhsachke, this.pathPos);
     this.emergencyGraph = new EmergencyGraph(52, 28, this.danhsachke, this.pathPos);
 
     this.desDom = this.add.dom(1790, 600).createFromCache("des");
     this.desDom.setPerspective(800);  
 
     let r = Math.floor(Math.random() * this.pathPos.length);
-    while(!Constant.validDestination(this.pathPos[r].x, this.pathPos[r].y, 1, 14)){
+    while (!Constant.validDestination(this.pathPos[r].x, this.pathPos[r].y, 1, 14)) {
       r = Math.floor(Math.random() * this.pathPos.length);
     }
     this.agv = new Agv(
@@ -107,7 +108,7 @@ export class MainScene extends Scene {
     this.timeTable && this.agv.writeDeadline(this.timeTable);
     var des = document.getElementById("des");
       if (des) {
-        while(des.childNodes.length >= 1) {
+        while (des.childNodes.length >= 1) {
           des.firstChild && des.removeChild(des.firstChild);
         }
 
@@ -464,7 +465,7 @@ export class MainScene extends Scene {
 
   private createRandomAutoAgv() {
     let r = Math.floor(Math.random() * this.pathPos.length);
-    while(!Constant.validDestination(this.pathPos[r].x, this.pathPos[r].y, 1, 13)){
+    while (!Constant.validDestination(this.pathPos[r].x, this.pathPos[r].y, 1, 13)) {
       r = Math.floor(Math.random() * this.pathPos.length);
     }
     if (this.graph) {
@@ -472,13 +473,29 @@ export class MainScene extends Scene {
       this.timeTable && tempAgv.writeDeadline(this.timeTable);
       var des = document.getElementById("des");
       if (des) {
-        while(des.childNodes.length >= 1) {
+        while (des.childNodes.length >= 1) {
           des.firstChild && des.removeChild(des.firstChild);
         }
 
         des.appendChild(des.ownerDocument.createTextNode(this.timeTable?.text || ""));
       }
       this.autoAgvs.add(tempAgv);
+    }
+  }
+
+  public get graph(): Graph {
+    if (Constant.MODE == ModeOfPathPlanning.FRANSEN) {
+      return (this.spaceGraph as Graph);
+    } else {
+      return (this.emergencyGraph as Graph);
+    }
+  }
+
+  public initGraph(): void {
+    if(Constant.MODE == ModeOfPathPlanning.FRANSEN) {
+      this.spaceGraph = new Graph(52, 28, this.danhsachke, this.pathPos);
+    } else {
+      this.emergencyGraph = new EmergencyGraph(52, 28, this.danhsachke, this.pathPos);
     }
   }
 

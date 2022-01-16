@@ -1,11 +1,16 @@
 import { Actor } from "./classes/actor";
 import { Node2D } from "./classes/node";
 
+export enum ModeOfPathPlanning {
+    FRANSEN,
+    PROPOSE
+}
 export class Constant {
-    public static DURATION : number = 4; //thời gian AutoAgv đợi để nhận/dỡ hàng khi đến đích
+    public static get DURATION(): number { return 4; } //thời gian AutoAgv đợi để nhận/dỡ hàng khi đến đích
     public static getLateness = (x: number) => 5*x; //hàm tính chi phí thiệt hại nếu đến quá sớm hoặc quá trễ
-    public static SAFE_DISTANCE = 46;
-    public static DELTA_T = 10;
+    public static get SAFE_DISTANCE() : number { return 46; }
+    public static get DELTA_T() : number { return 10; }
+    public static get MODE() : ModeOfPathPlanning { return ModeOfPathPlanning.FRANSEN; }
     
     public static secondsToHMS(seconds : number) : string {
         var h = Math.floor(seconds % (3600*24) / 3600);
