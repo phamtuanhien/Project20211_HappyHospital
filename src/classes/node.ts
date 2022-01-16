@@ -97,7 +97,7 @@ export class Node2D {
   }
 
   public equal(node: Node2D) {
-    if(node.isVirtualNode)
+    if (node.isVirtualNode != this.isVirtualNode)
       return false;
     return this.x == node.x && this.y == node.y;
   }
