@@ -159,8 +159,10 @@ export class MainScene extends Scene {
   public set harmfullness(value: number) {
     this._harmfullness = value;
     this.harmfulTable
-      ?.setText("H.ness: " + this._harmfullness.toFixed(2))
-      .setPosition(window.innerWidth - 245, 320);
+      ?.setText("H.ness:" + this._harmfullness.toFixed(3).replace("\.",","))
+      .setFontSize(26)
+      .setOrigin(0.1)
+      .setPosition(window.innerWidth - 215, 320);
   }
 
   createAgents(numAgentInit: number, time: number) {
