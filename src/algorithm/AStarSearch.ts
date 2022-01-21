@@ -141,6 +141,15 @@ export class Astar {
           neighbor.h = this.heuristic2(neighbor, this.end);
           neighbor.f = neighbor.h + neighbor.g;
           neighbor.previous = current;
+        } else {
+          let tempG = current.g + 1;
+          if (tempG < neighbor.g) {
+            openSet.push(neighbor);
+            const index = closeSet.indexOf(neighbor);
+            if (index > -1) {
+              closeSet.splice(index, 1);
+            }
+          }
         }
       }
     }

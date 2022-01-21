@@ -190,17 +190,18 @@ export class Graph {
       for (let i = 0; i < neighbors.length; i++) {
         let neighbor = neighbors[i];
         if (neighbor != null) {
+          let timexoay = 0;
+          if (
+            previous[current.x][current.y] &&
+            neighbor.x != previous[current.x][current.y].x &&
+            neighbor.y != previous[current.x][current.y].y
+          ) {
+            timexoay = 1;
+          }
+          let tempG =
+          astar_g[current.x][current.y] + 1 + current.getW() + timexoay;
+
           if (!this.isInclude(neighbor, closeSet)) {
-            let timexoay = 0;
-            if (
-              previous[current.x][current.y] &&
-              neighbor.x != previous[current.x][current.y].x &&
-              neighbor.y != previous[current.x][current.y].y
-            ) {
-              timexoay = 1;
-            }
-            let tempG =
-              astar_g[current.x][current.y] + 1 + current.getW() + timexoay;
             if (this.isInclude(neighbor, openSet)) {
               if (tempG < astar_g[neighbor.x][neighbor.y]) {
                 astar_g[neighbor.x][neighbor.y] = tempG;
@@ -214,7 +215,15 @@ export class Graph {
             astar_f[neighbor.x][neighbor.y] =
               astar_h[neighbor.x][neighbor.y] + astar_g[neighbor.x][neighbor.y];
             previous[neighbor.x][neighbor.y] = current;
-          }//end of if (!this.isInclude(neighbor, closeSet)) {
+          } else {
+            if (tempG < astar_g[neighbor.x][neighbor.y]) {
+              openSet.push(neighbor);
+              const index = closeSet.indexOf(neighbor);
+              if (index > -1) {
+                closeSet.splice(index, 1);
+              }
+            }
+          }
         }
       }
     }//end of while (openSet.length > 0)
