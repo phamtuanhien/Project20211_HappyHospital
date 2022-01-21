@@ -479,6 +479,7 @@ export class MainScene extends Scene {
 
         des.appendChild(des.ownerDocument.createTextNode(this.timeTable?.text || ""));
       }
+      this.autoAgvs.forEach(agv => this.physics.add.collider(agv, tempAgv))
       this.autoAgvs.add(tempAgv);
     }
   }
